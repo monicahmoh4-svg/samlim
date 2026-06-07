@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SAM-LiMP Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/dist/tabler-icons.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --earth:#0d2b1a;--forest:#0a5c38;--leaf:#12a05c;--lime:#3dd68c;--mint:#b8f0d4;--mist:#edfaf3;
+  --gold:#c97b0a;--sun:#f0a500;--sand:#fef5e4;--rust:#bf3a12;--clay:#f7e8da;
+  --sky:#1464a0;--ice:#ddeeff;--bone:#f6f3ee;--white:#fff;
+  --ink:#0f1e16;--ink2:#3a5247;--ash:#7a9088;--border:#d8e8df;
+  --sidebar:256px;--hdr:60px;
+  --r:12px;--rl:18px;
+  --shadow:0 2px 12px rgba(10,92,56,.08);--shadow-md:0 4px 20px rgba(10,92,56,.12);
+  --tr:.2s cubic-bezier(.4,0,.2,1);
+}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bone);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;line-height:1.25}
+button{font-family:'Cabinet Grotesk',sans-serif;cursor:pointer;border:none}
+input,select,textarea{font-family:'Cabinet Grotesk',sans-serif}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#c8ddd5;border-radius:5px}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px;border-radius:4px}
+
+/* LAYOUT */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);background:var(--earth);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:200;overflow-y:auto;transition:transform var(--tr)}
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:var(--hdr);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.content{padding:24px 26px;flex:1}
+
+/* SIDEBAR */
+.sb-logo{padding:18px 16px 12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo-inner{display:flex;align-items:center;gap:10px}
+.sb-lm{width:38px;height:38px;background:var(--leaf);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-lm i{font-size:21px;color:#fff}
+.sb-lw{font-size:17px;font-weight:900;color:#fff;letter-spacing:-.3px}
+.sb-ls{font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.06em;margin-top:1px}
+.sb-season{margin:10px 14px;background:rgba(61,214,140,.1);border:1px solid rgba(61,214,140,.18);border-radius:8px;padding:7px 11px;display:flex;align-items:center;gap:7px}
+.sb-season i{font-size:15px;color:var(--lime)}
+.sb-season span{font-size:11px;color:rgba(255,255,255,.65);font-weight:500}
+.sb-sec{padding:12px 18px 3px;font-size:9px;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:10px;margin:1px 8px;padding:9px 11px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.5);font-size:12.5px;font-weight:600;transition:all var(--tr)}
+.sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+.sb-item.active{background:var(--leaf);color:#fff;box-shadow:0 2px 12px rgba(18,160,92,.35)}
+.sb-item i{font-size:18px;flex-shrink:0}
+.sb-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(255,255,255,.14);color:#fff}
+.sb-badge.hot{background:var(--rust)}
+.sb-div{height:1px;background:rgba(255,255,255,.06);margin:8px 16px}
+.sb-footer{margin-top:auto;padding:14px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-user{display:flex;align-items:center;gap:9px}
+.sb-av{width:34px;height:34px;border-radius:50%;background:var(--leaf);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-un{font-size:12px;color:rgba(255,255,255,.8);font-weight:600}
+.sb-ur{font-size:10px;color:rgba(255,255,255,.35)}
+.sb-out{margin-left:auto;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.07);border:none;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);cursor:pointer;transition:all var(--tr)}
+.sb-out:hover{background:rgba(193,68,14,.3);color:#f08060}
+.sb-out i{font-size:16px}
+
+/* TOPBAR */
+.tb-title h2{font-size:16px;font-weight:800;color:var(--ink)}
+.tb-title p{font-size:11px;color:var(--ash)}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tb-search{display:flex;align-items:center;gap:7px;background:var(--bone);border:1px solid var(--border);border-radius:9px;padding:7px 12px;min-width:180px;transition:border var(--tr)}
+.tb-search:focus-within{border-color:var(--leaf);background:#fff}
+.tb-search i{font-size:15px;color:var(--ash)}
+.tb-search input{border:none;background:transparent;outline:none;font-size:12.5px;color:var(--ink);width:100%;font-family:'Cabinet Grotesk',sans-serif}
+.tb-search input::placeholder{color:var(--ash)}
+.tb-btn{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;color:var(--ash);cursor:pointer;transition:all var(--tr);position:relative}
+.tb-btn:hover{background:var(--mist);border-color:var(--leaf);color:var(--forest)}
+.tb-btn i{font-size:18px}
+.tb-ndot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--rust);border-radius:50%;border:1.5px solid #fff}
+.tb-chip{display:flex;align-items:center;gap:5px;background:var(--mist);border:1px solid var(--mint);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--forest)}
+.tb-chip i{font-size:13px}
+.tb-hamburger{display:none;width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:transparent;align-items:center;justify-content:center;cursor:pointer;color:var(--ash)}
+.tb-hamburger i{font-size:20px}
+
+/* PAGES */
+.page{display:none;animation:pgin .25s ease}
+.page.active{display:block}
+@keyframes pgin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.pg-hd{margin-bottom:20px}
+.pg-hd h1{font-size:22px;color:var(--ink);margin-bottom:3px}
+.pg-hd p{font-size:12px;color:var(--ash)}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;transition:box-shadow var(--tr);position:relative;overflow:hidden;cursor:default}
+.kpi::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:0 var(--rl) 0 100%;background:var(--kbg,var(--mist));opacity:.7}
+.kpi:hover{box-shadow:var(--shadow-md)}
+.kpi-ico{width:36px;height:36px;border-radius:9px;background:var(--kbg,var(--mist));display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.kpi-ico i{font-size:19px;color:var(--kc,var(--leaf))}
+.kpi-lbl{font-size:10px;font-weight:700;color:var(--ash);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.kpi-val{font-size:22px;font-weight:900;color:var(--ink);line-height:1}
+.kpi-trend{font-size:10px;margin-top:5px;display:flex;align-items:center;gap:3px;font-weight:600}
+.t-up{color:var(--leaf)}.t-dn{color:var(--rust)}.t-n{color:var(--ash)}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;margin-bottom:14px}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-hl{display:flex;align-items:center;gap:8px}
+.card-hl i{font-size:18px;color:var(--leaf)}
+.card-ttl{font-size:13.5px;font-weight:800;color:var(--ink)}
+.card-act{font-size:11px;color:var(--leaf);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;padding:5px 9px;border-radius:7px;border:1px solid transparent;transition:all var(--tr)}
+.card-act:hover{background:var(--mist);border-color:var(--mint)}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r)}
+table{width:100%;border-collapse:collapse;min-width:480px}
+thead th{background:var(--bone);padding:9px 13px;font-size:10px;font-weight:700;color:var(--ash);text-transform:uppercase;letter-spacing:.06em;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:11px 13px;font-size:12.5px;border-bottom:1px solid #f0f5f2;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#f8fdf9}
+.td-name{font-weight:700;color:var(--ink)}
+.td-sub{font-size:10px;color:var(--ash);margin-top:1px}
+
+/* PILLS */
+.pill{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:800}
+.p-g{background:#d4f5e4;color:#0a5c38}.p-a{background:#fef5e4;color:#7a4500}
+.p-b{background:#ddeeff;color:#0a3f70}.p-r{background:#fde8e2;color:#8a1a05}
+.p-gr{background:#eaeeec;color:#3a5247}.p-t{background:#d4f0ed;color:#07524a}
+.p-pu{background:#ede8ff;color:#4a1fa0}
+
+/* FORMS */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.fg label{font-size:10px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em}
+.fg input,.fg select,.fg textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'Cabinet Grotesk',sans-serif;color:var(--ink);background:#fff;transition:all var(--tr)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 3px rgba(18,160,92,.1)}
+.fg textarea{resize:vertical;min-height:80px}
+.fg .hint{font-size:10px;color:var(--ash)}
+.fg select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a9088' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.frow{display:grid;gap:13px;margin-bottom:13px}
+.fr2{grid-template-columns:1fr 1fr}
+.fr3{grid-template-columns:1fr 1fr 1fr}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;font-size:12.5px;font-weight:700;font-family:'Cabinet Grotesk',sans-serif;border:none;cursor:pointer;transition:all var(--tr);white-space:nowrap}
+.btn-p{background:var(--leaf);color:#fff;box-shadow:0 2px 10px rgba(18,160,92,.25)}
+.btn-p:hover{background:var(--forest);transform:translateY(-1px)}
+.btn-s{background:var(--mist);color:var(--forest);border:1px solid var(--mint)}
+.btn-s:hover{background:var(--mint)}
+.btn-o{background:transparent;color:var(--leaf);border:1.5px solid var(--leaf)}
+.btn-o:hover{background:var(--mist)}
+.btn-g{background:var(--gold);color:#fff;box-shadow:0 2px 10px rgba(201,123,10,.25)}
+.btn-g:hover{background:#a86200;transform:translateY(-1px)}
+.btn-r{background:var(--clay);color:var(--rust);border:1px solid #f0c0a8}
+.btn-r:hover{background:#fbd0c6}
+.btn-full{width:100%;justify-content:center;padding:11px 18px;font-size:13.5px}
+.btn i{font-size:16px}
+.btn-sm{padding:6px 13px;font-size:11.5px}
+.btn-sm i{font-size:14px}
+.btn-ico{width:34px;height:34px;padding:0;justify-content:center;border-radius:8px}
+
+/* PROGRESS */
+.prog{margin-bottom:10px}
+.prog-hd{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.prog-hd .lbl{color:var(--ink2);font-weight:500}
+.prog-hd .val{font-weight:800;color:var(--ink)}
+.prog-bar{height:7px;background:#e4ede9;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--leaf),var(--lime));transition:width 1.4s cubic-bezier(.4,0,.2,1)}
+.prog-fill.amb{background:linear-gradient(90deg,var(--gold),var(--sun))}
+.prog-fill.sky{background:linear-gradient(90deg,var(--sky),#4da0e8)}
+.prog-fill.rust{background:linear-gradient(90deg,var(--rust),#e07050)}
+
+/* STATS ROW */
+.sr{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0f5f2;font-size:12.5px}
+.sr:last-child{border-bottom:none}
+.sr .lbl{color:var(--ash)}
+.sr .val{font-weight:700;color:var(--ink)}
+
+/* REV STREAMS */
+.rs{display:flex;align-items:center;gap:13px;padding:12px 0;border-bottom:1px solid #f0f5f2}
+.rs:last-child{border-bottom:none}
+.rs-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.rs-title{font-size:12.5px;font-weight:700;color:var(--ink)}
+.rs-desc{font-size:11px;color:var(--ash);margin-top:1px;line-height:1.5}
+.rs-amt{font-size:14px;font-weight:900;white-space:nowrap}
+
+/* FARMER ROW */
+.fr{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid #f0f5f2}
+.fr:last-child{border-bottom:none}
+.fav{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.av-g{background:#d4f5e4;color:#0a5c38}.av-b{background:#ddeeff;color:#0a3f70}
+.av-a{background:#fef5e4;color:#7a4500}.av-r{background:#fde8e2;color:#8a1a05}
+.av-t{background:#d4f0ed;color:#07524a}
+.fr-info{flex:1}
+.fr-name{font-size:12.5px;font-weight:700;color:var(--ink)}
+.fr-meta{font-size:11px;color:var(--ash);margin-top:1px}
+
+/* INVESTOR CARD */
+.inv-hero{background:linear-gradient(135deg,#0d3320 0%,#1a4d2e 60%,#0d5c3a 100%);border-radius:var(--rl);padding:24px 26px;color:#fff;margin-bottom:14px;position:relative;overflow:hidden}
+.inv-hero::before{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:rgba(61,214,140,.07)}
+.inv-ttl{font-size:20px;font-weight:900;margin-bottom:7px}
+.inv-body{font-size:12.5px;opacity:.72;line-height:1.7;max-width:580px}
+.sdg-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.sdg-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);font-size:10px;font-weight:700;color:rgba(255,255,255,.8)}
+.sdg-pill i{font-size:13px;color:var(--lime)}
+
+/* MOAT */
+.moat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.moat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:18px;text-align:center;transition:all var(--tr)}
+.moat-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.moat-ico{width:50px;height:50px;border-radius:50%;margin:0 auto 11px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.moat-ttl{font-size:12.5px;font-weight:800;color:var(--ink);margin-bottom:5px}
+.moat-desc{font-size:11px;color:var(--ash);line-height:1.6}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;right:20px;background:var(--earth);color:#fff;padding:12px 18px;border-radius:12px;font-size:12.5px;font-weight:600;box-shadow:var(--shadow-md);z-index:9999;display:flex;align-items:center;gap:9px;transform:translateY(70px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);max-width:320px}
+#toast.show{transform:translateY(0);opacity:1}
+#toast i{font-size:18px;color:var(--lime);flex-shrink:0}
+
+/* MODAL */
+.mbg{position:fixed;inset:0;background:rgba(10,30,18,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+.mbg.open{opacity:1;pointer-events:all}
+.mbox{background:#fff;border-radius:var(--rl);padding:24px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;transform:scale(.94) translateY(10px);transition:transform .28s cubic-bezier(.34,1.56,.64,1);box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.mbg.open .mbox{transform:scale(1) translateY(0)}
+.mhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.mttl{font-size:17px;font-weight:900;color:var(--ink)}
+.mx{width:30px;height:30px;border-radius:8px;background:var(--bone);border:none;display:flex;align-items:center;justify-content:center;color:var(--ash);cursor:pointer;transition:all var(--tr)}
+.mx:hover{background:var(--clay);color:var(--rust)}
+.mx i{font-size:17px}
+
+/* OVERVIEW HERO */
+.ov-hero{background:linear-gradient(135deg,var(--earth) 0%,var(--forest) 100%);border-radius:var(--rl);padding:22px 24px;color:#fff;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
+.ov-hero::before{content:'';position:absolute;right:-30px;top:-30px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.04)}
+.ov-text h2{font-size:18px;font-weight:900;margin-bottom:4px}
+.ov-text p{font-size:12px;opacity:.6;max-width:360px;line-height:1.6}
+.ov-stats{display:flex;gap:24px;flex-shrink:0}
+.ovs-v{font-size:20px;font-weight:900;color:var(--lime)}
+.ovs-l{font-size:9px;opacity:.45;margin-top:2px}
+
+/* QUICK ACTIONS */
+.qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.qa{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:14px;text-align:center;cursor:pointer;transition:all var(--tr)}
+.qa:hover{box-shadow:var(--shadow-md);border-color:var(--mint);transform:translateY(-2px)}
+.qa-ico{width:42px;height:42px;border-radius:50%;margin:0 auto 9px;display:flex;align-items:center;justify-content:center;font-size:21px}
+.qa-lbl{font-size:11.5px;font-weight:800;color:var(--ink)}
+.qa-sub{font-size:9px;color:var(--ash);margin-top:2px}
+
+/* INTEGRATIONS */
+.int-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f5f2}
+.int-row:last-child{border-bottom:none}
+.int-left{display:flex;align-items:center;gap:10px}
+.int-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.int-lbl{font-size:12.5px;font-weight:700;color:var(--ink)}
+.int-sub{font-size:10px;color:var(--ash);margin-top:1px}
+
+/* TOGGLES */
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f5f2}
+.tog-row:last-child{border-bottom:none}
+.tog-lbl{font-size:12.5px;font-weight:600;color:var(--ink)}
+.tog-sub{font-size:10px;color:var(--ash);margin-top:1px}
+.tog{width:36px;height:20px;background:#dde8e3;border-radius:20px;position:relative;cursor:pointer;transition:background var(--tr);flex-shrink:0}
+.tog.on{background:var(--leaf)}
+.tog::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform var(--tr);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.tog.on::after{transform:translateX(16px)}
+
+/* CHART */
+.chart-wrap{position:relative;width:100%}
+
+/* REVENUE TOTAL BOX */
+.rev-total{background:linear-gradient(135deg,var(--forest),#0f7a4a);border-radius:var(--rl);padding:20px 22px;color:#fff;text-align:center;margin-top:14px}
+.rt-lbl{font-size:10px;opacity:.55;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.rt-amt{font-size:38px;font-weight:900;letter-spacing:-1px}
+.rt-usd{font-size:12px;opacity:.5;margin-top:3px}
+
+/* API STATUS */
+.api-status{display:flex;align-items:center;gap:8px;background:var(--mist);border:1px solid var(--mint);border-radius:9px;padding:9px 13px;margin-bottom:14px;font-size:11.5px;color:var(--forest)}
+.api-status i{font-size:16px}
+.api-offline{background:#fde8e2;border-color:#f7c5b8;color:var(--rust)}
+
+/* LOADING */
+.loading{text-align:center;padding:28px;color:var(--ash);font-size:12px}
+.loading i{font-size:26px;display:block;margin-bottom:7px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* LIVE DOT */
+.ldot{display:inline-block;width:6px;height:6px;background:var(--lime);border-radius:50%;animation:pulse 1.8s ease infinite;margin-right:4px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TWO / THREE COL GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .tb-hamburger{display:flex}
+  .tb-search,.tb-chip{display:none}
+  .g2,.g3,.frow.fr2,.frow.fr3,.moat-grid,.qa-grid{grid-template-columns:1fr}
+  .ov-hero{flex-direction:column;gap:14px;align-items:flex-start}
+  .ov-stats{gap:14px}
+  .content{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- CONFIG -->
+<script>const API_BASE='http://localhost:5000/api';</script>
+
+<!-- TOAST -->
+<div id="toast" role="alert" aria-live="polite"><i class="ti ti-circle-check"></i><span id="tmsg">Done!</span></div>
+
+<!-- MODAL -->
+<div class="mbg" id="mbg" onclick="closeMod(event)">
+  <div class="mbox" id="mbox"><div class="mhd"><span class="mttl" id="mttl">Modal</span><button class="mx" onclick="closeMod()"><i class="ti ti-x"></i></button></div><div id="mcontent"></div></div>
+</div>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar" aria-label="Admin navigation">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-lm"><i class="ti ti-plant-2"></i></div>
+        <div><div class="sb-lw">SAM-LiMP</div><div class="sb-ls">Admin Dashboard</div></div>
+      </div>
+    </div>
+    <div class="sb-season"><i class="ti ti-cloud-rain"></i><span>Long Rains · June 2026</span></div>
+    <div class="sb-sec">Platform</div>
+    <div class="sb-item active" onclick="nav('overview',this)"><i class="ti ti-layout-dashboard"></i>Overview<span class="sb-badge">Live</span></div>
+    <div class="sb-item" onclick="nav('farmers',this)"><i class="ti ti-users"></i>Farmers<span class="sb-badge" id="sb-farmer-count">…</span></div>
+    <div class="sb-item" onclick="nav('marketplace',this)"><i class="ti ti-shopping-bag"></i>Marketplace<span class="sb-badge hot" id="sb-listing-count">…</span></div>
+    <div class="sb-item" onclick="nav('hubs',this)"><i class="ti ti-building-warehouse"></i>Hubs<span class="sb-badge">14</span></div>
+    <div class="sb-item" onclick="nav('payments',this)"><i class="ti ti-cash"></i>Payments</div>
+    <div class="sb-div"></div>
+    <div class="sb-sec">Business</div>
+    <div class="sb-item" onclick="nav('revenue',this)"><i class="ti ti-trending-up"></i>Revenue Model</div>
+    <div class="sb-item" onclick="nav('investor',this)"><i class="ti ti-presentation"></i>Investor View</div>
+    <div class="sb-item" onclick="nav('analytics',this)"><i class="ti ti-chart-bar"></i>Analytics</div>
+    <div class="sb-div"></div>
+    <div class="sb-sec">System</div>
+    <div class="sb-item" onclick="nav('settings',this)"><i class="ti ti-settings"></i>Settings</div>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-av">DK</div>
+        <div><div class="sb-un">Dev Kamau</div><div class="sb-ur">Platform Owner</div></div>
+        <button class="sb-out" onclick="showToast('Logged out')" aria-label="Log out"><i class="ti ti-logout"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="tb-hamburger" onclick="toggleSB()" aria-label="Toggle menu"><i class="ti ti-menu-2"></i></button>
+      <div class="tb-title">
+        <h2 id="tb-ttl">Dashboard Overview</h2>
+        <p id="tb-sub"><span class="ldot"></span>Live · June 2026</p>
+      </div>
+      <div class="tb-search"><i class="ti ti-search"></i><input type="search" placeholder="Search farmers, hubs, listings…" id="global-search"/></div>
+      <div class="tb-right">
+        <div class="tb-chip"><i class="ti ti-calendar"></i>Long Rains 2026</div>
+        <button class="tb-btn" onclick="showToast('Refreshed')" aria-label="Refresh"><i class="ti ti-refresh"></i></button>
+        <button class="tb-btn" onclick="showToast('Downloading report…')" aria-label="Download report"><i class="ti ti-download"></i></button>
+        <button class="tb-btn" aria-label="Notifications" style="position:relative" onclick="showToast('3 new notifications')"><i class="ti ti-bell"></i><span class="tb-ndot"></span></button>
+      </div>
+    </header>
+
+    <main class="content" id="main-content">
+
+      <!-- ========== OVERVIEW ========== -->
+      <section id="page-overview" class="page active">
+        <div class="ov-hero">
+          <div class="ov-text">
+            <h2>Good morning, Kamau 🌿</h2>
+            <p>SAM-LiMP is connecting <strong style="color:var(--lime)" id="ov-farmers">…</strong> farmers to direct buyers. Post-harvest loss is down to 8.2% from the 42% industry average.</p>
+          </div>
+          <div class="ov-stats">
+            <div><div class="ovs-v" id="ov-paid">…</div><div class="ovs-l">Disbursed</div></div>
+            <div><div class="ovs-v" id="ov-jobs">312</div><div class="ovs-l">Jobs created</div></div>
+            <div><div class="ovs-v">2.8×</div><div class="ovs-l">Income multiplier</div></div>
+          </div>
+        </div>
+
+        <div class="qa-grid">
+          <div class="qa" onclick="nav('farmers',document.querySelector('[onclick*=farmers]'))">
+            <div class="qa-ico" style="background:#d4f5e4"><i class="ti ti-user-plus" style="color:#0a5c38"></i></div>
+            <div class="qa-lbl">Register Farmer</div><div class="qa-sub">Add new member</div>
+          </div>
+          <div class="qa" onclick="nav('marketplace',document.querySelector('[onclick*=marketplace]'))">
+            <div class="qa-ico" style="background:#fef5e4"><i class="ti ti-plus" style="color:#7a4500"></i></div>
+            <div class="qa-lbl">Post Listing</div><div class="qa-sub">New produce</div>
+          </div>
+          <div class="qa" onclick="nav('payments',document.querySelector('[onclick*=payments]'))">
+            <div class="qa-ico" style="background:#ddeeff"><i class="ti ti-send" style="color:#0a3f70"></i></div>
+            <div class="qa-lbl">Send Payment</div><div class="qa-sub">M-Pesa transfer</div>
+          </div>
+          <div class="qa" onclick="nav('hubs',document.querySelector('[onclick*=hubs]'))">
+            <div class="qa-ico" style="background:#d4f0ed"><i class="ti ti-building-warehouse" style="color:#07524a"></i></div>
+            <div class="qa-lbl">Manage Hubs</div><div class="qa-sub">14 active</div>
+          </div>
+        </div>
+
+        <div class="kpi-grid" id="ov-kpis">
+          <div class="loading"><i class="ti ti-loader-2"></i>Loading KPIs…</div>
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><div class="card-hl"><i class="ti ti-chart-bar"></i><span class="card-ttl">Monthly disbursements (KES '000)</span></div></div>
+            <div class="chart-wrap" style="height:200px"><canvas id="ov-bar" role="img" aria-label="Monthly disbursements bar chart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-hl"><i class="ti ti-chart-pie-2"></i><span class="card-ttl">Produce by category</span></div></div>
+            <div class="chart-wrap" style="height:200px"><canvas id="ov-pie" role="img" aria-label="Produce categories pie chart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hl"><i class="ti ti-activity"></i><span class="card-ttl">Live activity feed</span></div>
+            <span class="card-act" onclick="loadOverview()"><i class="ti ti-refresh"></i>Refresh</span>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Farmer</th><th>Action</th><th>Product</th><th>Amount</th><th>Hub</th><th>Status</th></tr></thead>
+              <tbody id="ov-feed">
+                <tr><td colspan="6" class="loading"><i class="ti ti-loader-2"></i>Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== FARMERS ========== -->
+      <section id="page-farmers" class="page">
+        <div class="pg-hd"><h1>Farmer Management</h1><p>Register, track and support smallholder farmers across all counties.</p></div>
+
+        <!-- Income compare -->
+        <div style="display:flex;gap:12px;margin-bottom:16px">
+          <div style="flex:1;background:#fde8e2;border:1px solid #f7c5b8;border-radius:var(--rl);padding:14px;text-align:center">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--rust);margin-bottom:4px">Before SAM-LiMP</div>
+            <div style="font-size:24px;font-weight:900;color:var(--rust)">KES 4,200</div>
+            <div style="font-size:10px;color:var(--ash);margin-top:3px">avg monthly · selling raw</div>
+          </div>
+          <div style="display:flex;align-items:center;font-size:20px;color:var(--leaf);font-weight:900;flex-shrink:0">→</div>
+          <div style="flex:1;background:#d4f5e4;border:1px solid #a0e8c5;border-radius:var(--rl);padding:14px;text-align:center">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#0a5c38;margin-bottom:4px">With SAM-LiMP</div>
+            <div style="font-size:24px;font-weight:900;color:var(--forest)">KES 11,800</div>
+            <div style="font-size:10px;color:var(--ash);margin-top:3px">avg monthly · 2.8× increase</div>
+          </div>
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><div class="card-hl"><i class="ti ti-user-plus"></i><span class="card-ttl">Register new farmer</span></div></div>
+            <div class="frow fr2">
+              <div class="fg"><label>Full name</label><input type="text" id="f-name" placeholder="Jane Wambui"/></div>
+              <div class="fg"><label>M-Pesa phone</label><input type="tel" id="f-phone" placeholder="0712 000 000"/></div>
+            </div>
+            <div class="frow fr2">
+              <div class="fg"><label>National ID</label><input type="text" id="f-id" placeholder="National ID"/></div>
+              <div class="fg"><label>County</label>
+                <select id="f-county"><option value="">Select county</option>
+                  <option>Kiambu</option><option>Nakuru</option><option>Meru</option><option>Kisii</option>
+                  <option>Kakamega</option><option>Nyeri</option><option>Murang'a</option><option>Embu</option>
+                  <option>Machakos</option><option>Nyandarua</option></select>
+              </div>
+            </div>
+            <div class="frow fr2">
+              <div class="fg"><label>Primary crop</label>
+                <select id="f-crop"><option value="">Select crop</option>
+                  <option>Maize</option><option>Tomatoes</option><option>Potatoes</option><option>Avocado</option>
+                  <option>Kale</option><option>Coffee</option><option>Beans</option><option>Onions</option></select>
+              </div>
+              <div class="fg"><label>Land size (acres)</label><input type="number" id="f-land" placeholder="2.5" min="0.1" step="0.1"/></div>
+            </div>
+            <div class="fg"><label>Nearest hub</label>
+              <select id="f-hub"><option value="">Select hub</option>
+                <option>Kiambu Hub 1</option><option>Kiambu Hub 2</option><option>Nakuru Hub 1</option>
+                <option>Meru Hub 1</option><option>Kakamega Hub</option></select>
+            </div>
+            <div class="fg"><label>4-digit PIN</label><input type="password" id="f-pin" maxlength="6" placeholder="••••"/><span class="hint">Farmer uses this to log into the consumer app</span></div>
+            <button class="btn btn-p btn-full" onclick="registerFarmer()"><i class="ti ti-user-check"></i>Register & Send M-Pesa Welcome SMS</button>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-hd">
+                <div class="card-hl"><i class="ti ti-users"></i><span class="card-ttl">Farmer directory</span></div>
+                <button class="btn btn-s btn-sm" onclick="showToast('Exporting farmer list…')"><i class="ti ti-file-export"></i>Export</button>
+              </div>
+              <div id="farmer-list"><div class="loading"><i class="ti ti-loader-2"></i>Loading…</div></div>
+              <div style="margin-top:12px">
+                <button class="btn btn-o btn-full btn-sm" onclick="showToast('Loading all farmers…')"><i class="ti ti-list"></i>View all farmers</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-hd"><div class="card-hl"><i class="ti ti-chart-bar"></i><span class="card-ttl">Value addition by crop</span></div></div>
+              <div id="crop-bars"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><div class="card-hl"><i class="ti ti-arrows-exchange"></i><span class="card-ttl">Raw vs processed income (KES/kg)</span></div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Crop</th><th>Raw price</th><th>Processed form</th><th>Processed price</th><th>Value gain</th><th>Uplift</th></tr></thead>
+              <tbody id="crop-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== MARKETPLACE ========== -->
+      <section id="page-marketplace" class="page">
+        <div class="pg-hd"><h1>Produce Marketplace</h1><p>Direct buyer–farmer connections. No brokers. Better prices for everyone.</p></div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi" style="--kbg:#d4f5e4;--kc:#0a5c38"><div class="kpi-ico"><i class="ti ti-list"></i></div><div class="kpi-lbl">Live listings</div><div class="kpi-val" id="mkt-open">…</div><div class="kpi-trend t-n">Open bids</div></div>
+          <div class="kpi" style="--kbg:#d4f5e4;--kc:#0a5c38"><div class="kpi-ico"><i class="ti ti-trending-up"></i></div><div class="kpi-lbl">Price premium</div><div class="kpi-val">+67%</div><div class="kpi-trend t-up"><i class="ti ti-arrow-up" style="font-size:11px"></i>vs raw market</div></div>
+          <div class="kpi" style="--kbg:#ddeeff;--kc:#0a3f70"><div class="kpi-ico"><i class="ti ti-users"></i></div><div class="kpi-lbl">Buyers online</div><div class="kpi-val">12</div><div class="kpi-trend t-n"><span class="ldot"></span>Live</div></div>
+          <div class="kpi" style="--kbg:#fef5e4;--kc:#7a4500"><div class="kpi-ico"><i class="ti ti-receipt"></i></div><div class="kpi-lbl">Deals this week</div><div class="kpi-val">28</div><div class="kpi-trend t-up"><i class="ti ti-arrow-up" style="font-size:11px"></i>+8 vs last wk</div></div>
+        </div>
+        <div class="g2">
+          <div>
+            <div class="card">
+              <div class="card-hd"><div class="card-hl"><i class="ti ti-list"></i><span class="card-ttl">Active listings</span></div>
+                <button class="btn btn-s btn-sm" onclick="showToast('Filter applied')"><i class="ti ti-filter"></i>Filter</button>
+              </div>
+              <div id="listing-list"><div class="loading"><i class="ti ti-loader-2"></i>Loading…</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-hl"><i class="ti ti-plus"></i><span class="card-ttl">Post new listing</span></div></div>
+            <div class="fg"><label>Product name</label><input type="text" id="l-name" placeholder="e.g. Tomato paste"/></div>
+            <div class="frow fr2">
+              <div class="fg"><label>Processing type</label>
+                <select id="l-type"><option value="fresh_raw">Fresh (raw)</option><option value="dried">Dried</option>
+                  <option value="milled">Milled / flour</option><option value="paste_sauce">Paste / sauce</option>
+                  <option value="chips_sliced">Chips / sliced</option><option value="roasted">Roasted</option>
+                  <option value="cold_pressed">Cold-pressed oil</option><option value="packaged">Packaged</option></select>
+              </div>
+              <div class="fg"><label>Hub</label>
+                <select id="l-hub"><option>Kiambu Hub 1</option><option>Kiambu Hub 2</option>
+                  <option>Nakuru Hub 1</option><option>Meru Hub 1</option><option>Kakamega Hub</option></select>
+              </div>
+            </div>
+            <div class="frow fr2">
+              <div class="fg"><label>Quantity (kg)</label><input type="number" id="l-qty" placeholder="200" min="1"/></div>
+              <div class="fg"><label>Price (KES/kg)</label><input type="number" id="l-price" placeholder="85" min="1"/></div>
+            </div>
+            <div class="fg"><label>Farmer phone (M-Pesa)</label><input type="tel" id="l-farmer-phone" placeholder="0712 000 000"/></div>
+            <div class="fg"><label>Notes for buyers</label><textarea id="l-notes" placeholder="Quality, harvest date, packaging…" style="min-height:65px"></textarea></div>
+            <div class="fg"><label>Bid deadline</label><input type="date" id="l-deadline"/></div>
+            <div class="fg" style="flex-direction:row;align-items:center;gap:10px;margin-bottom:14px">
+              <input type="checkbox" id="l-urgent" style="width:16px;height:16px;accent-color:var(--rust)"/>
+              <label for="l-urgent" style="font-size:12px;font-weight:600;color:var(--ink2);text-transform:none;letter-spacing:0">Mark as urgent (perishable)</label>
+            </div>
+            <button class="btn btn-p btn-full" onclick="postListing()"><i class="ti ti-send"></i>Post & Notify Buyers</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== HUBS ========== -->
+      <section id="page-hubs" class="page">
+        <div class="pg-hd"><h1>Processing Hubs</h1><p>Community-run hubs where raw produce is aggregated, processed and packaged for higher value.</p></div>
+        <div class="kpi-grid">
+          <div class="kpi" style="--kbg:#d4f5e4;--kc:#0a5c38"><div class="kpi-ico"><i class="ti ti-building-warehouse"></i></div><div class="kpi-lbl">Total hubs</div><div class="kpi-val" id="hub-count-kpi">14</div><div class="kpi-trend t-n">5 counties</div></div>
+          <div class="kpi" style="--kbg:#fef5e4;--kc:#7a4500"><div class="kpi-ico"><i class="ti ti-users"></i></div><div class="kpi-lbl">Youth operators</div><div class="kpi-val">42</div><div class="kpi-trend t-up"><i class="ti ti-arrow-up" style="font-size:11px"></i>3 per hub avg</div></div>
+          <div class="kpi" style="--kbg:#ddeeff;--kc:#0a3f70"><div class="kpi-ico"><i class="ti ti-coin"></i></div><div class="kpi-lbl">Avg hub rev/mo</div><div class="kpi-val">KES 85K</div><div class="kpi-trend t-up"><i class="ti ti-arrow-up" style="font-size:11px"></i>+22% MoM</div></div>
+          <div class="kpi" style="--kbg:#d4f0ed;--kc:#07524a"><div class="kpi-ico"><i class="ti ti-clock"></i></div><div class="kpi-lbl">Payback period</div><div class="kpi-val">4 months</div><div class="kpi-trend t-up">Best-in-class ROI</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hl"><i class="ti ti-building-warehouse"></i><span class="card-ttl">Hub directory</span></div>
+            <button class="btn btn-p btn-sm" onclick="openHubModal()"><i class="ti ti-plus"></i>Apply for new hub</button>
+          </div>
+          <div class="tbl-wrap" id="hub-table"><div class="loading"><i class="ti ti-loader-2"></i>Loading hubs…</div></div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><div class="card-hl"><i class="ti ti-tools"></i><span class="card-ttl">Equipment per hub</span></div></div>
+            <div class="sr"><span class="lbl">Milling machines</span><span class="val">1 unit</span></div>
+            <div class="sr"><span class="lbl">Solar drying racks</span><span class="val">3 sets</span></div>
+            <div class="sr"><span class="lbl">Cold storage unit</span><span class="val">1 unit (shared)</span></div>
+            <div class="sr"><span class="lbl">Packaging machine</span><span class="val">1 unit</span></div>
+            <div class="sr"><span class="lbl">Digital weighing scales</span><span class="val">2 units</span></div>
+            <div class="sr"><span class="lbl">M-Pesa POS terminal</span><span class="val">1 unit</span></div>
+            <div class="sr"><span class="lbl">Smart inventory tablet</span><span class="val">1 unit</span></div>
+            <button class="btn btn-s btn-full btn-sm" style="margin-top:12px" onclick="showToast('Equipment form opened')"><i class="ti ti-package"></i>Order equipment for new hub</button>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-hl"><i class="ti ti-map-2"></i><span class="card-ttl">Hub coverage by county</span></div></div>
+            <div id="hub-coverage"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== PAYMENTS ========== -->
+      <section id="page-payments" class="page">
+        <div class="pg-hd"><h1>M-Pesa Payments</h1><p>Instant mobile money disbursements directly to farmers. No bank needed.</p></div>
+        <div style="background:linear-gradient(135deg,#0d2b1a 0%,var(--forest) 100%);border-radius:var(--rl);padding:22px 24px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden">
+          <div style="position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
+          <div style="font-size:10px;opacity:.5;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">Total disbursed this season</div>
+          <div style="font-size:38px;font-weight:900;color:var(--lime);letter-spacing:-1px" id="pay-total-hero">…</div>
+          <div style="font-size:12px;opacity:.55">Long Rains 2026 · all farmers</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)">
+            <div><div style="font-size:18px;font-weight:900" id="pay-txn-count">…</div><div style="font-size:10px;opacity:.45;margin-top:2px">Transactions</div></div>
+            <div><div style="font-size:18px;font-weight:900" id="pay-avg">…</div><div style="font-size:10px;opacity:.45;margin-top:2px">Avg payout</div></div>
+            <div><div style="font-size:18px;font-weight:900">98.4%</div><div style="font-size:10px;opacity:.45;margin-top:2px">Success rate</div></div>
+            <div><div style="font-size:18px;font-weight:900">&lt;30s</div><div style="font-size:10px;opacity:.45;margin-top:2px">Avg speed</div></div>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><div class="card-hl"><i class="ti ti-send"></i><span class="card-ttl">Send payment</span></div></div>
+            <div class="fg"><label>Farmer name</label><input type="text" id="p-name" placeholder="Jane Wambui"/></div>
+            <div class="fg"><label>M-Pesa phone</label><input type="tel" id="p-phone" placeholder="0712 000 000"/></div>
+            <div class="frow fr2">
+              <div class="fg"><label>Amount (KES)</label><input type="number" id="p-amount" placeholder="5,000"/></div>
+              <div class="fg"><label>Reference</label><input type="text" id="p-ref" placeholder="Sale ID"/></div>
+            </div>
+            <div class="frow fr2">
+              <div class="fg"><label>Hub</label>
+                <select id="p-hub"><option>Kiambu Hub 1</option><option>Kiambu Hub 2</option>
+                  <option>Nakuru Hub 1</option><option>Meru Hub 1</option><option>Kakamega Hub</option></select>
+              </div>
+              <div class="fg"><label>Crop</label>
+                <select id="p-crop"><option>Tomatoes</option><option>Maize</option><option>Avocado</option>
+                  <option>Potatoes</option><option>Kale</option><option>Coffee</option></select>
+              </div>
+            </div>
+            <button class="btn btn-p btn-full" onclick="sendPayment()"><i class="ti ti-device-mobile"></i>Send via M-Pesa STK Push</button>
+            <p style="font-size:10px;color:var(--ash);text-align:center;margin-top:7px"><i class="ti ti-lock" style="font-size:12px;vertical-align:-2px"></i> Secured via Safaricom Daraja API · Encrypted</p>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-hd">
+                <div class="card-hl"><i class="ti ti-clock"></i><span class="card-ttl">Recent transactions</span></div>
+                <span class="card-act" onclick="showToast('Statement downloaded')"><i class="ti ti-file-download"></i>Statement</span>
+              </div>
+              <div id="pay-history"><div class="loading"><i class="ti ti-loader-2"></i>Loading…</div></div>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-hl"><i class="ti ti-chart-bar"></i><span class="card-ttl">Monthly disbursements (KES '000)</span></div></div>
+              <div class="chart-wrap" style="height:160px"><canvas id="pay-chart" role="img" aria-label="Monthly payment bar chart"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== REVENUE ========== -->
+      <section id="page-revenue" class="page">
+        <div class="pg-hd"><h1>Revenue Model</h1><p>Your five income streams as platform owner — with a live growth projector.</p></div>
+        <div class="card">
+          <div class="card-hd"><div class="card-hl"><i class="ti ti-coin"></i><span class="card-ttl">Income streams</span></div></div>
+          <div class="rs"><div class="rs-ico" style="background:#d4f5e4"><i class="ti ti-percentage" style="color:#0a5c38"></i></div><div style="flex:1"><div class="rs-title">Transaction commission — 2.5% per deal</div><div class="rs-desc">Charged on every buyer–farmer marketplace deal. Scales with growth. Zero marginal cost.</div></div><div style="text-align:right"><div class="rs-amt" style="color:var(--forest)" id="rs-comm">KES 702K/mo</div><span class="pill p-g">Core stream</span></div></div>
+          <div class="rs"><div class="rs-ico" style="background:#ddeeff"><i class="ti ti-building-store" style="color:#0a3f70"></i></div><div style="flex:1"><div class="rs-title">Hub licensing — KES 5,000/hub/month</div><div class="rs-desc">Hub operators pay a monthly franchise fee for platform access, protocols and brand.</div></div><div style="text-align:right"><div class="rs-amt" style="color:var(--sky)" id="rs-hub">KES 70K/mo</div><span class="pill p-b">Recurring</span></div></div>
+          <div class="rs"><div class="rs-ico" style="background:#fef5e4"><i class="ti ti-crown" style="color:#7a4500"></i></div><div style="flex:1"><div class="rs-title">Buyer premium subscription — KES 3,000/month</div><div class="rs-desc">Priority notifications, analytics dashboard, bulk order tools, verified buyer badge.</div></div><div style="text-align:right"><div class="rs-amt" style="color:var(--gold)" id="rs-sub">KES 120K/mo</div><span class="pill p-a">SaaS</span></div></div>
+          <div class="rs"><div class="rs-ico" style="background:#fde8e2"><i class="ti ti-speakerphone" style="color:#8a1a05"></i></div><div style="flex:1"><div class="rs-title">Agri-input advertisements</div><div class="rs-desc">Fertilizer suppliers, seed companies, agri-finance lenders pay to reach the farmer base.</div></div><div style="text-align:right"><div class="rs-amt" style="color:var(--rust)" id="rs-ads">KES 45K/mo</div><span class="pill p-r">Ad revenue</span></div></div>
+          <div class="rs"><div class="rs-ico" style="background:#d4f0ed"><i class="ti ti-api" style="color:#07524a"></i></div><div style="flex:1"><div class="rs-title">B2B data API — anonymized agri-intelligence</div><div class="rs-desc">Farm-gate pricing, supply forecasts, yield analytics sold to NGOs, ministries, fintechs.</div></div><div style="text-align:right"><div class="rs-amt" style="color:#07524a" id="rs-data">KES 30K/mo</div><span class="pill p-t">High margin</span></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><div class="card-hl"><i class="ti ti-adjustments"></i><span class="card-ttl">Revenue projector — drag sliders to model growth</span></div></div>
+          <div class="g2" style="margin-bottom:16px">
+            <div>
+              <div class="fg" style="margin-bottom:12px"><label>Active farmers: <strong id="sl-f-v">1,247</strong></label><input type="range" min="100" max="20000" step="100" value="1247" id="sl-f" oninput="calcRev()" style="width:100%;margin-top:6px;accent-color:var(--leaf)"/></div>
+              <div class="fg" style="margin-bottom:12px"><label>Active hubs: <strong id="sl-h-v">14</strong></label><input type="range" min="1" max="200" step="1" value="14" id="sl-h" oninput="calcRev()" style="width:100%;margin-top:6px;accent-color:var(--leaf)"/></div>
+            </div>
+            <div>
+              <div class="fg" style="margin-bottom:12px"><label>Avg deal size (KES): <strong id="sl-d-v">18,000</strong></label><input type="range" min="5000" max="120000" step="1000" value="18000" id="sl-d" oninput="calcRev()" style="width:100%;margin-top:6px;accent-color:var(--leaf)"/></div>
+              <div class="fg" style="margin-bottom:12px"><label>Premium buyers: <strong id="sl-b-v">40</strong></label><input type="range" min="0" max="500" step="5" value="40" id="sl-b" oninput="calcRev()" style="width:100%;margin-top:6px;accent-color:var(--leaf)"/></div>
+            </div>
+          </div>
+          <div class="kpi-grid" style="margin-bottom:0">
+            <div class="kpi" style="--kbg:#d4f5e4;--kc:#0a5c38"><div class="kpi-lbl">Commission</div><div class="kpi-val" id="r-comm" style="font-size:18px">KES 702K</div></div>
+            <div class="kpi" style="--kbg:#ddeeff;--kc:#0a3f70"><div class="kpi-lbl">Hub licensing</div><div class="kpi-val" id="r-hub" style="font-size:18px">KES 70K</div></div>
+            <div class="kpi" style="--kbg:#fef5e4;--kc:#7a4500"><div class="kpi-lbl">Subscriptions</div><div class="kpi-val" id="r-sub" style="font-size:18px">KES 120K</div></div>
+            <div class="kpi" style="--kbg:#fde8e2;--kc:#8a1a05"><div class="kpi-lbl">Ads + Data API</div><div class="kpi-val" id="r-ads" style="font-size:18px">KES 75K</div></div>
+          </div>
+          <div class="rev-total"><div class="rt-lbl">Estimated monthly platform revenue</div><div class="rt-amt" id="r-total">KES 967K</div><div class="rt-usd" id="r-usd">≈ USD 7,500 / month</div></div>
+        </div>
+      </section>
+
+      <!-- ========== INVESTOR ========== -->
+      <section id="page-investor" class="page">
+        <div class="pg-hd"><h1>Investor View</h1><p>Investment case, traction metrics and impact thesis for DFIs and impact investors.</p></div>
+        <div class="inv-hero">
+          <div class="inv-ttl">Why SAM-LiMP is investment-ready</div>
+          <div class="inv-body">Africa's agri-food market is projected to reach $1 trillion by 2030. SAM-LiMP captures value at the farm-gate — the most underserved, highest-margin point in the chain. Our model is asset-light (we don't own hubs), transaction-based, and network-effect driven. Every new farmer and hub makes the platform exponentially more valuable for everyone.</div>
+          <div class="sdg-row">
+            <span class="sdg-pill"><i class="ti ti-check"></i>SDG 1 – No Poverty</span>
+            <span class="sdg-pill"><i class="ti ti-check"></i>SDG 2 – Zero Hunger</span>
+            <span class="sdg-pill"><i class="ti ti-check"></i>SDG 8 – Decent Work</span>
+            <span class="sdg-pill"><i class="ti ti-check"></i>SDG 9 – Innovation</span>
+            <span class="sdg-pill"><i class="ti ti-check"></i>SDG 10 – Reduced Inequality</span>
+            <span class="sdg-pill"><i class="ti ti-check"></i>SDG 17 – Partnerships</span>
+          </div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi" style="--kbg:#d4f5e4;--kc:#0a5c38"><div class="kpi-ico"><i class="ti ti-world"></i></div><div class="kpi-lbl">Addressable market</div><div class="kpi-val">$12B</div><div class="kpi-trend t-n">SSA agri-value chain</div></div>
+          <div class="kpi" style="--kbg:#d4f5e4;--kc:#0a5c38"><div class="kpi-ico"><i class="ti ti-clock"></i></div><div class="kpi-lbl">Hub payback period</div><div class="kpi-val">4 months</div><div class="kpi-trend t-up">Best-in-class ROI</div></div>
+          <div class="kpi" style="--kbg:#ddeeff;--kc:#0a3f70"><div class="kpi-ico"><i class="ti ti-chart-line"></i></div><div class="kpi-lbl">Gross margin</div><div class="kpi-val">74%</div><div class="kpi-trend t-up">Asset-light model</div></div>
+          <div class="kpi" style="--kbg:#fef5e4;--kc:#7a4500"><div class="kpi-ico"><i class="ti ti-star"></i></div><div class="kpi-lbl">Farmer NPS</div><div class="kpi-val">81</div><div class="kpi-trend t-n">Industry avg: 32</div></div>
+          <div class="kpi" style="--kbg:#d4f5e4;--kc:#0a5c38"><div class="kpi-ico"><i class="ti ti-arrows-maximize"></i></div><div class="kpi-lbl">Income multiplier</div><div class="kpi-val">2.8×</div><div class="kpi-trend t-up">Avg farmer income</div></div>
+          <div class="kpi" style="--kbg:#d4f0ed;--kc:#07524a"><div class="kpi-ico"><i class="ti ti-trending-up"></i></div><div class="kpi-lbl">MoM farmer growth</div><div class="kpi-val">+18%</div><div class="kpi-trend t-up">Organic + agents</div></div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><div class="card-hl"><i class="ti ti-target"></i><span class="card-ttl">12-month growth targets</span></div></div>
+            <div class="sr"><span class="lbl">Farmers onboarded</span><span class="val">10,000</span></div>
+            <div class="sr"><span class="lbl">Processing hubs</span><span class="val">50 hubs</span></div>
+            <div class="sr"><span class="lbl">Counties covered</span><span class="val">15 / 47</span></div>
+            <div class="sr"><span class="lbl">Monthly platform revenue</span><span class="val" style="color:var(--forest)">KES 5M+</span></div>
+            <div class="sr"><span class="lbl">Youth jobs created</span><span class="val">2,000+</span></div>
+            <div class="sr"><span class="lbl">Post-harvest loss target</span><span class="val" style="color:var(--leaf)">≤ 5%</span></div>
+            <div class="sr"><span class="lbl">Seed round ask</span><span class="val" style="color:var(--gold)">USD 350K</span></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-hl"><i class="ti ti-moneybag"></i><span class="card-ttl">Use of seed-round funds</span></div></div>
+            <div class="prog"><div class="prog-hd"><span class="lbl">Hub equipment & setup</span><span class="val">40% · USD 140K</span></div><div class="prog-bar"><div class="prog-fill" style="width:40%"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="lbl">Tech platform development</span><span class="val">25% · USD 87.5K</span></div><div class="prog-bar"><div class="prog-fill sky" style="width:25%"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="lbl">Farmer onboarding & agents</span><span class="val">20% · USD 70K</span></div><div class="prog-bar"><div class="prog-fill amb" style="width:20%"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="lbl">Operations & logistics</span><span class="val">10% · USD 35K</span></div><div class="prog-bar"><div class="prog-fill rust" style="width:10%"></div></div></div>
+            <div class="prog"><div class="prog-hd"><span class="lbl">Regulatory & compliance</span><span class="val">5% · USD 17.5K</span></div><div class="prog-bar"><div class="prog-fill" style="width:5%;background:var(--ash)"></div></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-hl"><i class="ti ti-shield-check"></i><span class="card-ttl">Competitive moat</span></div></div>
+          <div class="moat-grid">
+            <div class="moat-card"><div class="moat-ico" style="background:#d4f5e4"><i class="ti ti-network" style="color:#0a5c38"></i></div><div class="moat-ttl">Network effects</div><div class="moat-desc">More farmers attract more buyers. More buyers raise prices. Self-reinforcing flywheel.</div></div>
+            <div class="moat-card"><div class="moat-ico" style="background:#ddeeff"><i class="ti ti-database" style="color:#0a3f70"></i></div><div class="moat-ttl">Proprietary data</div><div class="moat-desc">Real-time farm-gate pricing from thousands of verified transactions. Impossible to replicate.</div></div>
+            <div class="moat-card"><div class="moat-ico" style="background:#fef5e4"><i class="ti ti-heart-handshake" style="color:#7a4500"></i></div><div class="moat-ttl">Community trust</div><div class="moat-desc">Youth-operated local hubs build deep ties. Farmer NPS of 81 vs industry average of 32.</div></div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-p" onclick="showToast('Pitch deck generating — check your email in 30 seconds')"><i class="ti ti-presentation"></i>Generate investor pitch deck</button>
+            <button class="btn btn-s" onclick="showToast('Financial model downloading…')"><i class="ti ti-table-export"></i>Download financial model</button>
+            <button class="btn btn-o" onclick="showToast('One-pager PDF generated!')"><i class="ti ti-file-description"></i>One-page summary</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== ANALYTICS ========== -->
+      <section id="page-analytics" class="page">
+        <div class="pg-hd"><h1>Analytics & Reports</h1><p>Platform-wide performance data across farmers, produce, hubs and financials.</p></div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi" style="--kbg:#d4f5e4;--kc:#0a5c38"><div class="kpi-lbl">Avg farmer income/mo</div><div class="kpi-val" style="font-size:18px">KES 11.8K</div><div class="kpi-trend t-up"><i class="ti ti-arrow-up" style="font-size:10px"></i>+181% vs baseline</div></div>
+          <div class="kpi" style="--kbg:#ddeeff;--kc:#0a3f70"><div class="kpi-lbl">Transactions/month</div><div class="kpi-val" style="font-size:18px">890</div><div class="kpi-trend t-up"><i class="ti ti-arrow-up" style="font-size:10px"></i>+25% MoM</div></div>
+          <div class="kpi" style="--kbg:#fef5e4;--kc:#7a4500"><div class="kpi-lbl">Conversion rate</div><div class="kpi-val" style="font-size:18px">68%</div><div class="kpi-trend t-n">Listings to deals</div></div>
+          <div class="kpi" style="--kbg:#d4f0ed;--kc:#07524a"><div class="kpi-lbl">Farmer retention</div><div class="kpi-val" style="font-size:18px">94%</div><div class="kpi-trend t-up">Season-over-season</div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-hd"><div class="card-hl"><i class="ti ti-chart-line"></i><span class="card-ttl">Farmer income growth (KES avg/mo)</span></div></div><div class="chart-wrap" style="height:200px"><canvas id="an-income" role="img" aria-label="Farmer income growth line chart"></canvas></div></div>
+          <div class="card"><div class="card-hd"><div class="card-hl"><i class="ti ti-chart-bar"></i><span class="card-ttl">Transactions per month</span></div></div><div class="chart-wrap" style="height:200px"><canvas id="an-txn" role="img" aria-label="Monthly transactions bar chart"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hl"><i class="ti ti-table"></i><span class="card-ttl">Monthly KPIs</span></div>
+            <button class="btn btn-s btn-sm" onclick="showToast('Exporting to Excel…')"><i class="ti ti-file-export"></i>Export</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Month</th><th>New farmers</th><th>Transactions</th><th>Disbursed (KES)</th><th>PHL rate</th><th>Avg income (KES)</th><th>Platform revenue</th></tr></thead>
+              <tbody>
+                <tr><td>January 2026</td><td>89</td><td>240</td><td>210,000</td><td>12.4%</td><td>6,200</td><td style="font-weight:700;color:var(--forest)">KES 312K</td></tr>
+                <tr><td>February 2026</td><td>112</td><td>330</td><td>290,000</td><td>11.1%</td><td>7,100</td><td style="font-weight:700;color:var(--forest)">KES 428K</td></tr>
+                <tr><td>March 2026</td><td>145</td><td>440</td><td>380,000</td><td>9.8%</td><td>8,300</td><td style="font-weight:700;color:var(--forest)">KES 571K</td></tr>
+                <tr><td>April 2026</td><td>198</td><td>590</td><td>520,000</td><td>9.0%</td><td>9,400</td><td style="font-weight:700;color:var(--forest)">KES 675K</td></tr>
+                <tr><td>May 2026</td><td>234</td><td>780</td><td>710,000</td><td>8.6%</td><td>10,600</td><td style="font-weight:700;color:var(--forest)">KES 812K</td></tr>
+                <tr><td>June 2026</td><td>271</td><td>890</td><td>890,000</td><td>8.2%</td><td>11,800</td><td style="font-weight:700;color:var(--forest)">KES 967K</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SETTINGS ========== -->
+      <section id="page-settings" class="page">
+        <div class="pg-hd"><h1>Platform Settings</h1><p>Configure fees, integrations, notifications and platform administration.</p></div>
+        <div class="g2">
+          <div>
+            <div class="card">
+              <div class="card-hd"><div class="card-hl"><i class="ti ti-percentage"></i><span class="card-ttl">Fee configuration</span></div></div>
+              <div class="fg"><label>Transaction commission (%)</label><input type="number" id="fee-comm" value="2.5" step="0.1" min="0" max="10"/><span class="hint">Applied on every buyer–farmer deal</span></div>
+              <div class="fg"><label>Hub monthly licensing fee (KES)</label><input type="number" id="fee-hub" value="5000" step="100"/></div>
+              <div class="fg"><label>Buyer premium subscription (KES/mo)</label><input type="number" id="fee-buyer" value="3000" step="100"/></div>
+              <button class="btn btn-p btn-sm" onclick="showToast('Fee settings saved!')"><i class="ti ti-device-floppy"></i>Save fee settings</button>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-hl"><i class="ti ti-bell"></i><span class="card-ttl">Notifications</span></div></div>
+              <div class="tog-row"><div><div class="tog-lbl">New farmer registrations</div><div class="tog-sub">Alert when a farmer joins</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="tog-row"><div><div class="tog-lbl">Post-harvest loss alerts</div><div class="tog-sub">When perishable stock nears expiry</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="tog-row"><div><div class="tog-lbl">Buyer bid notifications</div><div class="tog-sub">When a buyer places a bid</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="tog-row"><div><div class="tog-lbl">M-Pesa payment confirmations</div><div class="tog-sub">Every successful disbursement</div></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="tog-row"><div><div class="tog-lbl">Monthly analytics report</div><div class="tog-sub">Email on the 1st of each month</div></div><div class="tog" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-hd"><div class="card-hl"><i class="ti ti-plug"></i><span class="card-ttl">Integrations</span></div></div>
+              <div class="int-row"><div class="int-left"><div class="int-ico" style="background:#d4f5e4"><i class="ti ti-device-mobile" style="color:#0a5c38"></i></div><div><div class="int-lbl">M-Pesa Daraja API</div><div class="int-sub">Safaricom · Payments</div></div></div><span class="pill p-g">Connected</span></div>
+              <div class="int-row"><div class="int-left"><div class="int-ico" style="background:#ddeeff"><i class="ti ti-message" style="color:#0a3f70"></i></div><div><div class="int-lbl">Africa's Talking SMS</div><div class="int-sub">Bulk SMS notifications</div></div></div><span class="pill p-g">Connected</span></div>
+              <div class="int-row"><div class="int-left"><div class="int-ico" style="background:#fef5e4"><i class="ti ti-map-pin" style="color:#7a4500"></i></div><div><div class="int-lbl">Google Maps API</div><div class="int-sub">Hub locator & routing</div></div></div><span class="pill p-g">Connected</span></div>
+              <div class="int-row"><div class="int-left"><div class="int-ico" style="background:#ede8ff"><i class="ti ti-file-invoice" style="color:#4a1fa0"></i></div><div><div class="int-lbl">KRA eTims (invoicing)</div><div class="int-sub">Tax compliance</div></div></div><span class="pill p-a">Pending</span></div>
+              <div class="int-row"><div class="int-left"><div class="int-ico" style="background:#d4f0ed"><i class="ti ti-cloud-rain" style="color:#07524a"></i></div><div><div class="int-lbl">Weather API</div><div class="int-sub">Crop weather alerts</div></div></div><span class="pill p-gr">Not set up</span></div>
+              <button class="btn btn-o btn-sm" style="margin-top:12px" onclick="showToast('Integration marketplace opened')"><i class="ti ti-plus"></i>Add integration</button>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-hl"><i class="ti ti-user-cog"></i><span class="card-ttl">Platform profile</span></div></div>
+              <div class="fg"><label>Platform name</label><input type="text" value="SAM-LiMP Kenya"/></div>
+              <div class="frow fr2">
+                <div class="fg"><label>Support phone</label><input type="tel" value="+254 700 000 000"/></div>
+                <div class="fg"><label>Support email</label><input type="email" value="support@samlim.co.ke"/></div>
+              </div>
+              <div class="fg"><label>Website URL</label><input type="url" value="https://samlim.co.ke"/></div>
+              <button class="btn btn-p btn-sm" onclick="showToast('Profile saved!')"><i class="ti ti-device-floppy"></i>Save profile</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// ============================================================
+// CONFIG & STATE
+// ============================================================
+const API = 'http://localhost:5000/api';
+const GREEN='#12a05c',LIME='#3dd68c',AMBER='#c97b0a',SUN='#f0a500',SKY='#1464a0',RUST='#bf3a12';
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun'];
+const BASE_DISBURSED=[210,290,380,520,710,890];
+const BASE_TXN=[240,330,440,590,780,890];
+let _charts={};
+
+// ============================================================
+// API HELPER
+// ============================================================
+const api=async(path,opts={})=>{
+  const token=localStorage.getItem('admin_token');
+  try{
+    const r=await fetch(`${API}${path}`,{headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},... opts});
+    const d=await r.json();if(!r.ok)throw new Error(d.message);return d;
+  }catch(e){if(e.name==='TypeError')return null;throw e;}
+};
+
+// ============================================================
+// NAV
+// ============================================================
+const PAGE_META={
+  overview:['Dashboard Overview','Real-time platform snapshot'],
+  farmers:['Farmer Management','Onboard and manage smallholder farmers'],
+  marketplace:['Produce Marketplace','Direct buyer–farmer connections'],
+  hubs:['Processing Hubs','Community micro-processing network'],
+  payments:['M-Pesa Payments','Mobile money disbursements'],
+  revenue:['Revenue Model','Your income streams & projections'],
+  investor:['Investor View','Investment case & traction metrics'],
+  analytics:['Analytics & Reports','Platform performance data'],
+  settings:['Platform Settings','Configuration & integrations'],
+};
+function nav(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  if(el)el.classList.add('active');
+  const m=PAGE_META[id]||[id,''];
+  document.getElementById('tb-ttl').textContent=m[0];
+  document.getElementById('tb-sub').innerHTML=m[1];
+  document.getElementById('main-content').scrollTop=0;
+  if(window.innerWidth<900)document.getElementById('sidebar').classList.remove('open');
+  if(id==='payments')setTimeout(initPayChart,100);
+  if(id==='analytics')setTimeout(initAnalyticsCharts,100);
+}
+document.querySelectorAll('.sb-item').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();i.click();}}));
+
+function toggleSB(){document.getElementById('sidebar').classList.toggle('open');}
+
+// ============================================================
+// TOAST
+// ============================================================
+let _tt;
+function showToast(msg,icon='ti-circle-check'){
+  clearTimeout(_tt);
+  const t=document.getElementById('toast');
+  t.querySelector('i').className='ti '+icon;
+  document.getElementById('tmsg').textContent=msg;
+  t.classList.add('show');
+  _tt=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openMod(title,html){
+  document.getElementById('mttl').textContent=title;
+  document.getElementById('mcontent').innerHTML=html;
+  document.getElementById('mbg').classList.add('open');
+}
+function closeMod(e){if(!e||e.target===document.getElementById('mbg'))document.getElementById('mbg').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('mbg').classList.remove('open');});
+
+// ============================================================
+// DATA
+// ============================================================
+const MOCK_FARMERS=[
+  {_id:'f1',fullName:'Jane Wambui',county:'Kiambu',primaryCrop:'Tomatoes',landSize:3,phone:'254712000001',isActive:true,totalEarned:47200,initials:'JW',av:'av-g'},
+  {_id:'f2',fullName:'Moses Odhiambo',county:'Kakamega',primaryCrop:'Maize',landSize:5,phone:'254712000002',isActive:true,totalEarned:38500,initials:'MO',av:'av-b'},
+  {_id:'f3',fullName:'Faith Karimi',county:'Meru',primaryCrop:'Avocado',landSize:2,phone:'254712000003',isActive:true,totalEarned:29200,initials:'FK',av:'av-a'},
+  {_id:'f4',fullName:'Alice Kipchumba',county:'Nakuru',primaryCrop:'Potatoes',landSize:4,phone:'254712000004',isActive:true,totalEarned:22000,initials:'AK',av:'av-r'},
+  {_id:'f5',fullName:'David Mutua',county:'Kiambu',primaryCrop:'Coffee',landSize:1.5,phone:'254712000005',isActive:true,totalEarned:0,initials:'DM',av:'av-t'},
+];
+const MOCK_LISTINGS=[
+  {_id:'l1',productName:'Tomato paste',processingType:'paste_sauce',hubName:'Kiambu Hub 2',quantityKg:200,askingPriceKg:85,farmer:{fullName:'Jane Wambui'},status:'open',isUrgent:false,bidCount:2},
+  {_id:'l2',productName:'Dried avocado slices',processingType:'dried',hubName:'Meru Hub 1',quantityKg:80,askingPriceKg:340,farmer:{fullName:'Faith Karimi'},status:'negotiating',isUrgent:false,bidCount:1},
+  {_id:'l3',productName:'Maize flour (Grade A)',processingType:'milled',hubName:'Kakamega Hub',quantityKg:500,askingPriceKg:55,farmer:{fullName:'Moses Odhiambo'},status:'open',isUrgent:false,bidCount:3},
+  {_id:'l4',productName:'Fresh kale bundles',processingType:'fresh_raw',hubName:'Nakuru Hub 3',quantityKg:300,askingPriceKg:28,farmer:{fullName:'Various'},status:'open',isUrgent:true,bidCount:0},
+  {_id:'l5',productName:'Potato chips (unfried)',processingType:'chips_sliced',hubName:'Nakuru Hub 1',quantityKg:150,askingPriceKg:120,farmer:{fullName:'Alice Kipchumba'},status:'open',isUrgent:false,bidCount:1},
+];
+const MOCK_HUBS=[
+  {name:'Kiambu Hub 1',county:'Kiambu',operatorName:'Peter Njoroge',farmerCount:62,capacityTonsPerWeek:2,monthlyRevenue:78000,isActive:true,isFull:false},
+  {name:'Kiambu Hub 2',county:'Kiambu',operatorName:'Mary Wanjiku',farmerCount:58,capacityTonsPerWeek:1.5,monthlyRevenue:64000,isActive:true,isFull:false},
+  {name:'Nakuru Hub 1',county:'Nakuru',operatorName:'James Mwangi',farmerCount:72,capacityTonsPerWeek:3,monthlyRevenue:102000,isActive:true,isFull:false},
+  {name:'Nakuru Hub 3',county:'Nakuru',operatorName:'Samuel Koech',farmerCount:48,capacityTonsPerWeek:1.5,monthlyRevenue:71000,isActive:true,isFull:true},
+  {name:'Meru Hub 1',county:'Meru',operatorName:'Diana Nkatha',farmerCount:71,capacityTonsPerWeek:2.5,monthlyRevenue:89000,isActive:true,isFull:false},
+  {name:'Meru Hub 2',county:'Meru',operatorName:'Vincent Gitonga',farmerCount:67,capacityTonsPerWeek:2,monthlyRevenue:72000,isActive:true,isFull:false},
+  {name:'Kakamega Hub',county:'Kakamega',operatorName:'Lilian Nafula',farmerCount:89,capacityTonsPerWeek:4,monthlyRevenue:134000,isActive:true,isFull:false},
+  {name:'Nyeri Hub 1',county:'Nyeri',operatorName:'Recruiting…',farmerCount:0,capacityTonsPerWeek:0,monthlyRevenue:0,isActive:false,isFull:false},
+];
+const CROPS=[
+  {name:'Coffee',raw:30,processed:420,form:'Roasted beans',pct:93},
+  {name:'Avocado',raw:25,processed:340,form:'Avocado oil',pct:92},
+  {name:'Tomatoes',raw:18,processed:85,form:'Tomato paste',pct:79},
+  {name:'Potatoes',raw:15,processed:120,form:'Chips (unfried)',pct:77},
+  {name:'Maize',raw:12,processed:55,form:'Maize flour',pct:73},
+  {name:'Kale',raw:8,processed:28,form:'Bundled + packed',pct:71},
+];
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+async function loadOverview(){
+  const res=await api('/analytics/overview');
+  const d=res?.data;
+  const farmers=d?.totalFarmers||1247;
+  const paid=d?.totalDisbursedKES||4128500;
+  document.getElementById('ov-farmers').textContent=farmers.toLocaleString()+' farmers';
+  document.getElementById('ov-paid').textContent='KES '+Math.round(paid/1000)+'K';
+  document.getElementById('sb-farmer-count').textContent=farmers.toLocaleString();
+  document.getElementById('sb-listing-count').textContent=d?.openListings||43;
+
+  // KPI cards
+  const kpis=[
+    {lbl:'Registered Farmers',val:farmers.toLocaleString(),trend:'↑ +18% this month',tc:'t-up',bg:'#d4f5e4',c:'#0a5c38',ico:'ti-users'},
+    {lbl:'Produce Aggregated',val:'38.4 T',trend:'This season',tc:'t-n',bg:'#fef5e4',c:'#7a4500',ico:'ti-package'},
+    {lbl:'Post-harvest Loss',val:'8.2%',trend:'↓ from 42% avg',tc:'t-up',bg:'#fde8e2',c:'#8a1a05',ico:'ti-leaf-off'},
+    {lbl:'M-Pesa Disbursed',val:'KES '+(Math.round(paid/1000))+'K',trend:'↑ +34% vs last season',tc:'t-up',bg:'#ddeeff',c:'#0a3f70',ico:'ti-device-mobile'},
+    {lbl:'Active Buyers',val:d?.totalFarmers?'84':'84',trend:'↑ +12 this month',tc:'t-up',bg:'#d4f5e4',c:'#0a5c38',ico:'ti-shopping-bag'},
+    {lbl:'Youth Jobs Created',val:'312',trend:'Hub ops & agents',tc:'t-up',bg:'#d4f0ed',c:'#07524a',ico:'ti-briefcase'},
+  ];
+  document.getElementById('ov-kpis').innerHTML=kpis.map(k=>`
+    <div class="kpi" style="--kbg:${k.bg};--kc:${k.c}">
+      <div class="kpi-ico"><i class="ti ${k.ico}"></i></div>
+      <div class="kpi-lbl">${k.lbl}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-trend ${k.tc}">${k.trend}</div>
+    </div>`).join('');
+
+  // Pay total hero
+  document.getElementById('pay-total-hero').textContent='KES '+(paid/1000).toFixed(0)+'K';
+  document.getElementById('pay-txn-count').textContent=(d?.totalTransactions||2840).toLocaleString();
+  document.getElementById('pay-avg').textContent='KES '+(d?.avgPaymentKES||1454).toLocaleString();
+
+  // Activity feed
+  document.getElementById('ov-feed').innerHTML=`
+    <tr><td><div class="td-name">Jane Wambui</div><div class="td-sub">Kiambu</div></td><td>Sale completed</td><td>Tomato Paste 200kg</td><td style="font-weight:700;color:var(--forest)">KES 17,000</td><td>Kiambu Hub 2</td><td><span class="pill p-g">Paid ✓</span></td></tr>
+    <tr><td><div class="td-name">Moses Odhiambo</div><div class="td-sub">Kakamega</div></td><td>Sale completed</td><td>Maize Flour 500kg</td><td style="font-weight:700;color:var(--forest)">KES 27,500</td><td>Kakamega Hub</td><td><span class="pill p-g">Paid ✓</span></td></tr>
+    <tr><td><div class="td-name">Faith Karimi</div><div class="td-sub">Meru</div></td><td>Processing</td><td>Avocado Oil 80kg</td><td style="font-weight:700;color:var(--gold)">KES 27,200</td><td>Meru Hub 1</td><td><span class="pill p-a">Processing</span></td></tr>
+    <tr><td><div class="td-name">Alice Kipchumba</div><div class="td-sub">Nakuru</div></td><td>Listed</td><td>Potato Chips 150kg</td><td style="color:var(--ash)">KES 18,000</td><td>Nakuru Hub 1</td><td><span class="pill p-b">Open bid</span></td></tr>
+    <tr><td><div class="td-name">David Mutua</div><div class="td-sub">Kiambu</div></td><td>Registered</td><td>—</td><td>—</td><td>Kiambu Hub 1</td><td><span class="pill p-gr">New farmer</span></td></tr>`;
+  initOvCharts();
+}
+
+// FARMERS
+function loadFarmers(){
+  const el=document.getElementById('farmer-list');
+  el.innerHTML=MOCK_FARMERS.map(f=>`
+    <div class="fr">
+      <div class="fav ${f.av}">${f.initials}</div>
+      <div class="fr-info"><div class="fr-name">${f.fullName}</div><div class="fr-meta"><i class="ti ti-plant-2" style="font-size:12px"></i>${f.primaryCrop} · ${f.county} · ${f.landSize} acres</div></div>
+      <span class="pill ${f.isActive?'p-g':'p-gr'}">${f.isActive?'Active':'Inactive'}</span>
+    </div>`).join('');
+  buildCropBars();
+  buildCropTable();
+}
+
+// LISTINGS
+function loadListings(){
+  const el=document.getElementById('listing-list');
+  if(!el)return;
+  el.innerHTML=MOCK_LISTINGS.map(l=>`
+    <div style="background:var(--bone);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;transition:box-shadow var(--tr);cursor:pointer" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow=''">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+        <div><div style="font-size:13px;font-weight:700;color:var(--ink)">${l.productName}</div><div style="font-size:11px;color:var(--ash)">${l.hubName}</div></div>
+        <span class="pill ${l.isUrgent?'p-r':l.status==='negotiating'?'p-a':'p-b'}">${l.isUrgent?'🔥 Urgent':l.status==='negotiating'?'Negotiating':'Open bid'}</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div><div style="font-size:17px;font-weight:900;color:var(--forest)">KES ${l.askingPriceKg}/kg</div><div style="font-size:11px;color:var(--ash)">${l.quantityKg}kg · ${l.farmer?.fullName} · ${l.bidCount} bid${l.bidCount!==1?'s':''}</div></div>
+        <button class="btn btn-s btn-sm" onclick="showToast('Managing ${l.productName} listing')"><i class="ti ti-settings"></i></button>
+      </div>
+    </div>`).join('');
+  const m=document.getElementById('mkt-open');if(m)m.textContent=MOCK_LISTINGS.filter(l=>l.status==='open').length;
+}
+
+// HUBS
+function loadHubs(){
+  const el=document.getElementById('hub-table');
+  if(!el)return;
+  el.innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr><th>Hub name</th><th>County</th><th>Operator</th><th>Farmers</th><th>Cap/week</th><th>Revenue/mo</th><th>Status</th><th></th></tr></thead>
+    <tbody>${MOCK_HUBS.map(h=>`
+      <tr>
+        <td class="td-name">${h.name}</td>
+        <td>${h.county}</td>
+        <td>${h.operatorName}</td>
+        <td>${h.farmerCount||'—'}</td>
+        <td>${h.capacityTonsPerWeek?h.capacityTonsPerWeek+' T':'—'}</td>
+        <td style="font-weight:700;color:var(--forest)">${h.monthlyRevenue?'KES '+Math.round(h.monthlyRevenue/1000)+'K':'—'}</td>
+        <td><span class="pill ${!h.isActive?'p-gr':h.isFull?'p-a':'p-g'}">${!h.isActive?'Coming soon':h.isFull?'At capacity':'Operational'}</span></td>
+        <td><button class="btn btn-s btn-sm btn-ico" onclick="showToast('${h.name} details loaded')" aria-label="View"><i class="ti ti-eye"></i></button></td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+
+  const cov=document.getElementById('hub-coverage');
+  if(cov){
+    const byCounty={};
+    MOCK_HUBS.filter(h=>h.isActive).forEach(h=>{byCounty[h.county]=(byCounty[h.county]||[]);byCounty[h.county].push(h);});
+    cov.innerHTML=Object.entries(byCounty).map(([c,hs])=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f5f2">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:9px;height:9px;border-radius:50%;background:var(--leaf);flex-shrink:0"></div>
+          <div><div style="font-size:12.5px;font-weight:700;color:var(--ink)">${c}</div><div style="font-size:10px;color:var(--ash)">${hs.reduce((s,h)=>s+h.farmerCount,0)} farmers</div></div>
+        </div>
+        <span class="pill p-g">${hs.length} hub${hs.length!==1?'s':''}</span>
+      </div>`).join('')+
+      `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:var(--ash);flex-shrink:0"></div><div><div style="font-size:12.5px;font-weight:700;color:var(--ink)">Nyeri</div><div style="font-size:10px;color:var(--ash)">Coming soon</div></div></div>
+        <span class="pill p-gr">1 hub</span>
+      </div>`;
+  }
+}
+
+// PAYMENTS
+function loadPayments(){
+  const el=document.getElementById('pay-history');
+  if(!el)return;
+  const mockP=[
+    {name:'Jane Wambui',hub:'Kiambu Hub 2',desc:'Tomato paste sale',amt:17000,status:'success',av:'av-g',init:'JW',time:'10:42 AM'},
+    {name:'Moses Odhiambo',hub:'Kakamega Hub',desc:'Maize flour sale',amt:27500,status:'success',av:'av-b',init:'MO',time:'9:15 AM'},
+    {name:'Alice Kipchumba',hub:'Nakuru Hub 1',desc:'Potato chips',amt:18000,status:'pending',av:'av-r',init:'AK',time:'8:30 AM'},
+    {name:'Faith Karimi',hub:'Meru Hub 1',desc:'Avocado oil',amt:9200,status:'success',av:'av-a',init:'FK',time:'Yesterday'},
+  ];
+  el.innerHTML=mockP.map(p=>`
+    <div class="fr">
+      <div class="fav ${p.av}">${p.init}</div>
+      <div class="fr-info"><div class="fr-name">${p.name}</div><div class="fr-meta">${p.desc} · ${p.hub} · ${p.time}</div></div>
+      <div style="text-align:right"><div style="font-weight:900;color:var(--forest);font-size:13px">+KES ${p.amt.toLocaleString()}</div><span class="pill ${p.status==='success'?'p-g':'p-a'}" style="margin-top:3px;display:inline-flex">${p.status==='success'?'Completed':'Pending'}</span></div>
+    </div>`).join('');
+}
+
+// ============================================================
+// FORMS
+// ============================================================
+async function registerFarmer(){
+  const name=document.getElementById('f-name').value.trim();
+  const phone=document.getElementById('f-phone').value.trim();
+  const county=document.getElementById('f-county').value;
+  const pin=document.getElementById('f-pin').value.trim();
+  if(!name||!phone||!county){showToast('Please fill in name, phone and county','ti-alert-circle');return;}
+  if(pin&&pin.length<4){showToast('PIN must be at least 4 digits','ti-alert-circle');return;}
+  try{
+    const r=await api('/auth/register',{method:'POST',body:JSON.stringify({fullName:name,phone,county,primaryCrop:document.getElementById('f-crop').value,landSize:document.getElementById('f-land').value,pin:pin||'0000'})});
+    if(!r){/* mock success */}
+    const init=name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const avs=['av-g','av-b','av-a','av-r','av-t'];
+    const av=avs[Math.floor(Math.random()*avs.length)];
+    document.getElementById('farmer-list').insertAdjacentHTML('afterbegin',`
+      <div class="fr" style="animation:pgin .3s ease">
+        <div class="fav ${av}">${init}</div>
+        <div class="fr-info"><div class="fr-name">${name}</div><div class="fr-meta"><i class="ti ti-plant-2" style="font-size:12px"></i>${document.getElementById('f-crop').value||'—'} · ${county}</div></div>
+        <span class="pill p-gr">New</span>
+      </div>`);
+    showToast(`✓ ${name} registered! M-Pesa welcome sent to ${phone}`);
+    ['f-name','f-phone','f-id','f-pin','f-land'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  }catch(e){showToast(e.message,'ti-alert-circle');}
+}
+
+async function postListing(){
+  const name=document.getElementById('l-name').value.trim();
+  const qty=document.getElementById('l-qty').value;
+  const price=document.getElementById('l-price').value;
+  if(!name||!qty||!price){showToast('Please fill in product, quantity and price','ti-alert-circle');return;}
+  const hub=document.getElementById('l-hub').value;
+  const urgent=document.getElementById('l-urgent').checked;
+  try{
+    await api('/listings',{method:'POST',body:JSON.stringify({productName:name,quantityKg:Number(qty),askingPriceKg:Number(price),processingType:document.getElementById('l-type').value,hubName:hub,isUrgent:urgent,description:document.getElementById('l-notes').value})});
+  }catch(e){}
+  MOCK_LISTINGS.unshift({_id:'new-'+Date.now(),productName:name,processingType:document.getElementById('l-type').value,hubName:hub,quantityKg:Number(qty),askingPriceKg:Number(price),farmer:{fullName:'Admin'},status:'open',isUrgent:urgent,bidCount:0});
+  loadListings();
+  showToast(`${name} (${qty}kg) listed! Buyers notified via SMS.`);
+  ['l-name','l-qty','l-price','l-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+async function sendPayment(){
+  const phone=document.getElementById('p-phone').value.trim();
+  const amount=document.getElementById('p-amount').value;
+  const pname=document.getElementById('p-name').value.trim()||'Farmer';
+  if(!phone||!amount){showToast('Please enter phone and amount','ti-alert-circle');return;}
+  try{
+    await api('/payments/initiate',{method:'POST',body:JSON.stringify({farmerPhone:phone,amountKES:Number(amount),description:document.getElementById('p-ref').value||'Produce sale',hubName:document.getElementById('p-hub').value})});
+  }catch(e){}
+  showToast(`M-Pesa STK Push → ${pname} (${phone}) · KES ${parseInt(amount).toLocaleString()}`);
+  ['p-phone','p-amount','p-ref','p-name'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+// ============================================================
+// HUB MODAL
+// ============================================================
+function openHubModal(){
+  openMod('Apply to open a new hub',`
+    <div class="frow fr2">
+      <div class="fg"><label>Applicant name</label><input type="text" id="ha-name" placeholder="Full name"/></div>
+      <div class="fg"><label>Phone</label><input type="tel" id="ha-phone" placeholder="0712 000 000"/></div>
+    </div>
+    <div class="frow fr2">
+      <div class="fg"><label>County</label><select id="ha-county"><option>Kiambu</option><option>Nakuru</option><option>Meru</option><option>Kisii</option><option>Kakamega</option><option>Nyeri</option><option>Murang'a</option></select></div>
+      <div class="fg"><label>Village / location</label><input type="text" id="ha-loc" placeholder="Village, sub-county"/></div>
+    </div>
+    <div class="frow fr2">
+      <div class="fg"><label>Nearby farmers (est.)</label><input type="number" id="ha-farmers" placeholder="50"/></div>
+      <div class="fg"><label>Primary crops</label><input type="text" id="ha-crops" placeholder="Maize, Tomatoes"/></div>
+    </div>
+    <div class="fg"><label>Motivation</label><textarea id="ha-why" placeholder="Tell us about yourself and your community…"></textarea></div>
+    <button class="btn btn-p btn-full" onclick="submitHubApp()"><i class="ti ti-send"></i>Submit application</button>
+  `);
+}
+async function submitHubApp(){
+  const name=document.getElementById('ha-name').value.trim();
+  const phone=document.getElementById('ha-phone').value.trim();
+  if(!name||!phone){showToast('Name and phone required','ti-alert-circle');return;}
+  await api('/hubs/apply',{method:'POST',body:JSON.stringify({applicantName:name,phone,county:document.getElementById('ha-county').value,village:document.getElementById('ha-loc').value,farmerEstimate:document.getElementById('ha-farmers').value,crops:document.getElementById('ha-crops').value,motivation:document.getElementById('ha-why').value})});
+  closeMod();showToast('Hub application submitted! Contact in 48 hours.');
+}
+
+// ============================================================
+// CROP BARS & TABLE
+// ============================================================
+function buildCropBars(){
+  const el=document.getElementById('crop-bars');if(!el)return;
+  el.innerHTML=CROPS.map(c=>`
+    <div class="prog"><div class="prog-hd"><span class="lbl">${c.name} → ${c.form}</span><span class="val">+${c.pct}%</span></div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${c.pct}%"></div></div></div>`).join('');
+}
+function buildCropTable(){
+  const el=document.getElementById('crop-table');if(!el)return;
+  el.innerHTML=CROPS.map(c=>`
+    <tr><td class="td-name">${c.name}</td><td>KES ${c.raw}/kg</td><td>${c.form}</td>
+    <td>KES ${c.processed}/kg</td><td style="font-weight:700;color:var(--forest)">+KES ${c.processed-c.raw}/kg</td>
+    <td><span class="pill p-g">+${c.pct}%</span></td></tr>`).join('');
+}
+
+// ============================================================
+// REVENUE CALCULATOR
+// ============================================================
+function calcRev(){
+  const f=parseInt(document.getElementById('sl-f').value)||0;
+  const h=parseInt(document.getElementById('sl-h').value)||0;
+  const d=parseInt(document.getElementById('sl-d').value)||0;
+  const b=parseInt(document.getElementById('sl-b').value)||0;
+  document.getElementById('sl-f-v').textContent=f.toLocaleString();
+  document.getElementById('sl-h-v').textContent=h;
+  document.getElementById('sl-d-v').textContent=d.toLocaleString();
+  document.getElementById('sl-b-v').textContent=b;
+  const comm=Math.round(f*d*0.025/1000);
+  const hub=Math.round(h*5000/1000);
+  const sub=Math.round(b*3000/1000);
+  const ads=Math.round((f*0.03+h*500)/1000);
+  const total=comm+hub+sub+ads;
+  document.getElementById('r-comm').textContent='KES '+comm.toLocaleString()+'K';
+  document.getElementById('r-hub').textContent='KES '+hub.toLocaleString()+'K';
+  document.getElementById('r-sub').textContent='KES '+sub.toLocaleString()+'K';
+  document.getElementById('r-ads').textContent='KES '+ads.toLocaleString()+'K';
+  document.getElementById('r-total').textContent='KES '+total.toLocaleString()+'K';
+  document.getElementById('r-usd').textContent='≈ USD '+Math.round(total*1000/129).toLocaleString()+' / month';
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+const chartOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}};
+
+function initOvCharts(){
+  if(_charts.ovBar){_charts.ovBar.destroy();}
+  if(_charts.ovPie){_charts.ovPie.destroy();}
+  const barCtx=document.getElementById('ov-bar');
+  if(barCtx)_charts.ovBar=new Chart(barCtx,{type:'bar',data:{labels:MONTHS,datasets:[{data:BASE_DISBURSED,backgroundColor:[LIME,LIME,LIME,LIME,LIME,GREEN],borderRadius:4,borderSkipped:false}]},options:{...chartOpts,scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>v+'K',font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  const pieCtx=document.getElementById('ov-pie');
+  if(pieCtx)_charts.ovPie=new Chart(pieCtx,{type:'doughnut',data:{labels:['Maize','Tomatoes','Potatoes','Avocado','Other'],datasets:[{data:[35,25,18,12,10],backgroundColor:[GREEN,AMBER,SKY,RUST,'#888'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},padding:12}}},cutout:'60%'}});
+}
+
+let _payDone=false;
+function initPayChart(){
+  if(_payDone||!window.Chart)return;_payDone=true;
+  const ctx=document.getElementById('pay-chart');
+  if(ctx)new Chart(ctx,{type:'bar',data:{labels:MONTHS,datasets:[{data:BASE_DISBURSED,backgroundColor:[LIME,LIME,LIME,LIME,LIME,GREEN],borderRadius:4,borderSkipped:false}]},options:{...chartOpts,scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>v+'K',font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+}
+
+let _anDone=false;
+function initAnalyticsCharts(){
+  if(_anDone||!window.Chart)return;_anDone=true;
+  const inc=document.getElementById('an-income');
+  if(inc)new Chart(inc,{type:'line',data:{labels:MONTHS,datasets:[{data:[4200,5800,7600,9200,10800,11800],borderColor:GREEN,backgroundColor:'rgba(18,160,92,.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:GREEN,tension:.4,fill:true,label:'Avg income (KES)'}]},options:{...chartOpts,scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>'KES '+v.toLocaleString(),font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  const txn=document.getElementById('an-txn');
+  if(txn)new Chart(txn,{type:'bar',data:{labels:MONTHS,datasets:[{data:BASE_TXN,backgroundColor:[LIME,LIME,LIME,LIME,LIME,GREEN],borderRadius:4,borderSkipped:false,label:'Transactions'}]},options:{...chartOpts}});
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadOverview();
+setTimeout(()=>{loadFarmers();loadListings();loadHubs();loadPayments();buildCropBars();buildCropTable();},300);
+window.addEventListener('resize',()=>{if(window.innerWidth>=900)document.getElementById('sidebar').classList.remove('open');});
+</script>
+</body></html>
