@@ -2,13 +2,13 @@
   "name": "samlim",
   "version": "1.0.0",
   "description": "SAM-LiMP – Smart Agro-Market Linkage & Micro-Processing System",
+  "license": "MIT",
   "scripts": {
     "start": "cd backend && node server.js",
-    "dev": "cd backend && nodemon server.js",
     "build": "cd backend && npm install",
-    "install": "cd backend && npm install"
+    "dev": "cd backend && npm run dev"
   },
   "engines": {
     "node": ">=18.0.0"
   }
-}  
+}
