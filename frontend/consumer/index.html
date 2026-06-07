@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="description" content="SAM-LiMP – Connecting farmers to better prices. Sell your harvest directly, get paid via M-Pesa."/>
+<meta name="theme-color" content="#0a5c38"/>
+<title>SAM-LiMP – Shamba yako, Bei yako</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Literata:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/dist/tabler-icons.min.css"/>
+<style>
+/* =============================================
+   BASE
+============================================= */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --earth:#0d2b1a;
+  --forest:#0a5c38;
+  --leaf:#12a05c;
+  --lime:#3dd68c;
+  --mint:#b8f0d4;
+  --mist:#edfaf3;
+  --gold:#c97b0a;
+  --sun:#f0a500;
+  --sand:#fef5e4;
+  --rust:#bf3a12;
+  --clay:#f7e8da;
+  --sky:#1464a0;
+  --ice:#ddeeff;
+  --bone:#f6f3ee;
+  --white:#ffffff;
+  --ink:#0f1e16;
+  --ink2:#3a5247;
+  --ash:#7a9088;
+  --border:#d8e8df;
+  --r:14px;
+  --rl:20px;
+  --shadow:0 4px 20px rgba(10,92,56,.10);
+  --shadow-lg:0 8px 40px rgba(10,92,56,.16);
+  --tr:.22s cubic-bezier(.4,0,.2,1);
+}
+html{font-size:15px;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Cabinet Grotesk',sans-serif;
+  background:var(--bone);
+  color:var(--ink);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  padding-bottom:80px;
+}
+h1,h2,h3,h4{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;line-height:1.2}
+p,li{font-family:'Literata',serif;font-weight:400;line-height:1.65}
+a{text-decoration:none;color:inherit}
+button{font-family:'Cabinet Grotesk',sans-serif;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:'Cabinet Grotesk',sans-serif}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--mint);border-radius:4px}
+:focus-visible{outline:3px solid var(--lime);outline-offset:2px;border-radius:4px}
+
+/* =============================================
+   APP WRAPPER (mobile-first, max 480px centered)
+============================================= */
+.app{
+  max-width:480px;
+  margin:0 auto;
+  background:var(--white);
+  min-height:100vh;
+  position:relative;
+  box-shadow:0 0 60px rgba(0,0,0,.12);
+}
+
+/* =============================================
+   SPLASH SCREEN
+============================================= */
+#splash{
+  position:fixed;inset:0;
+  background:var(--forest);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;
+  transition:opacity .6s ease, transform .6s ease;
+}
+#splash.hide{opacity:0;transform:scale(1.04);pointer-events:none}
+.splash-logo{width:80px;height:80px;background:var(--lime);border-radius:22px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+  animation:splash-pulse 2s ease infinite}
+.splash-logo i{font-size:42px;color:var(--earth)}
+@keyframes splash-pulse{0%,100%{box-shadow:0 0 0 0 rgba(61,214,140,.5)}50%{box-shadow:0 0 0 20px rgba(61,214,140,0)}}
+.splash-name{font-family:'Cabinet Grotesk',sans-serif;font-size:32px;font-weight:900;color:var(--white);letter-spacing:-1px}
+.splash-tag{font-family:'Literata',serif;font-size:14px;color:rgba(255,255,255,.55);margin-top:6px;font-style:italic}
+.splash-loader{margin-top:40px;width:48px;height:3px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden}
+.splash-loader::after{content:'';display:block;height:100%;background:var(--lime);border-radius:3px;animation:loader 1.6s ease forwards}
+@keyframes loader{from{width:0}to{width:100%}}
+
+/* =============================================
+   TOP BAR
+============================================= */
+.topbar{
+  position:sticky;top:0;z-index:200;
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  padding:0 18px;
+  height:58px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.tb-logo{display:flex;align-items:center;gap:9px}
+.tb-logo-mark{width:34px;height:34px;background:var(--forest);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.tb-logo-mark i{font-size:19px;color:var(--lime)}
+.tb-logo-text{font-size:17px;font-weight:900;color:var(--ink);letter-spacing:-.4px}
+.tb-right{display:flex;align-items:center;gap:8px}
+.tb-btn{width:38px;height:38px;border-radius:10px;background:var(--mist);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--forest);transition:all var(--tr);position:relative}
+.tb-btn:hover,.tb-btn:focus-visible{background:var(--mint);border-color:var(--leaf)}
+.tb-btn i{font-size:20px}
+.tb-badge{position:absolute;top:5px;right:5px;width:8px;height:8px;background:var(--rust);border-radius:50%;border:1.5px solid var(--white)}
+.greeting-bar{background:var(--forest);color:var(--white);padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.gb-left{font-size:13px}
+.gb-name{font-size:16px;font-weight:800;margin-top:1px}
+.gb-mpesa{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--lime)}
+
+/* =============================================
+   BOTTOM NAV
+============================================= */
+.bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  background:var(--white);
+  border-top:1px solid var(--border);
+  display:grid;grid-template-columns:repeat(5,1fr);
+  padding:6px 0 10px;
+  z-index:200;
+  box-shadow:0 -4px 20px rgba(0,0,0,.06);
+}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;border-radius:10px;transition:all var(--tr);color:var(--ash);position:relative}
+.bn-item.active{color:var(--forest)}
+.bn-item i{font-size:23px}
+.bn-label{font-size:10px;font-weight:700}
+.bn-dot{position:absolute;top:2px;right:10px;width:7px;height:7px;background:var(--rust);border-radius:50%;border:1.5px solid var(--white)}
+.bn-item.active .bn-active-bar{
+  position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
+  width:24px;height:3px;background:var(--forest);border-radius:3px;
+}
+
+/* =============================================
+   PAGES
+============================================= */
+.page{display:none;animation:pg-in .28s ease}
+.page.active{display:block}
+@keyframes pg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* =============================================
+   SECTION TITLE
+============================================= */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;padding:0 18px;margin:20px 0 12px}
+.sec-title{font-size:16px;font-weight:800;color:var(--ink)}
+.sec-link{font-size:12px;font-weight:700;color:var(--leaf);display:flex;align-items:center;gap:3px}
+
+/* =============================================
+   HERO BANNER
+============================================= */
+.hero-banner{
+  margin:14px 14px 0;
+  background:linear-gradient(135deg,var(--forest) 0%,#0d7a47 100%);
+  border-radius:var(--rl);
+  padding:22px 20px;
+  color:var(--white);
+  position:relative;overflow:hidden;
+}
+.hero-banner::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.04)}
+.hero-banner::after{content:'';position:absolute;left:30%;bottom:-40px;width:140px;height:140px;border-radius:50%;background:rgba(61,214,140,.07)}
+.hb-eyebrow{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--lime);text-transform:uppercase;margin-bottom:6px}
+.hb-title{font-size:22px;font-weight:900;line-height:1.2;margin-bottom:8px}
+.hb-sub{font-family:'Literata',serif;font-size:13px;opacity:.75;margin-bottom:16px}
+.hb-cta{display:inline-flex;align-items:center;gap:6px;background:var(--lime);color:var(--earth);padding:10px 18px;border-radius:10px;font-size:13px;font-weight:800;transition:all var(--tr)}
+.hb-cta:hover,.hb-cta:focus-visible{background:var(--white);transform:scale(1.03)}
+.hb-cta i{font-size:17px}
+.hb-stats{display:flex;gap:0;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12)}
+.hb-stat{flex:1;text-align:center}
+.hb-stat-val{font-size:18px;font-weight:900;color:var(--lime)}
+.hb-stat-lbl{font-size:10px;opacity:.5;margin-top:1px;font-family:'Literata',serif}
+
+/* =============================================
+   INCOME CARD
+============================================= */
+.income-strip{
+  margin:14px;
+  background:var(--sand);
+  border:1.5px solid #f0d8a8;
+  border-radius:var(--rl);
+  padding:16px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.is-left{}
+.is-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin-bottom:4px}
+.is-val{font-size:26px;font-weight:900;color:var(--ink);line-height:1}
+.is-sub{font-size:11px;color:var(--ash);font-family:'Literata',serif;margin-top:3px}
+.is-arrow{font-size:22px;color:var(--leaf);font-weight:900;flex-shrink:0}
+.is-right{text-align:right}
+.is-right .is-tag{color:var(--leaf)}
+.is-right .is-val{color:var(--forest)}
+
+/* =============================================
+   PRODUCE CARDS (marketplace listings)
+============================================= */
+.produce-scroll{display:flex;gap:12px;padding:0 18px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.produce-scroll::-webkit-scrollbar{display:none}
+.produce-card{
+  flex-shrink:0;width:160px;
+  background:var(--white);border:1px solid var(--border);border-radius:var(--rl);
+  padding:14px;cursor:pointer;
+  transition:all var(--tr);
+}
+.produce-card:hover,.produce-card:focus-visible{box-shadow:var(--shadow);transform:translateY(-3px);border-color:var(--mint)}
+.pc-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-bottom:10px}
+.pc-b-processed{background:#d4f5e4;color:#0a5c38}
+.pc-b-fresh{background:#fef5e4;color:#8a5000}
+.pc-b-urgent{background:#fde8e2;color:#8a1a05}
+.pc-name{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.pc-hub{font-size:11px;color:var(--ash);display:flex;align-items:center;gap:4px;font-family:'Literata',serif}
+.pc-hub i{font-size:13px}
+.pc-price{font-size:20px;font-weight:900;color:var(--forest);margin:8px 0 4px}
+.pc-price span{font-size:11px;font-weight:400;color:var(--ash)}
+.pc-qty{font-size:11px;color:var(--ash);margin-bottom:10px;font-family:'Literata',serif}
+.pc-btn{width:100%;padding:8px;background:var(--mist);border-radius:9px;font-size:12px;font-weight:800;color:var(--forest);transition:all var(--tr)}
+.pc-btn:hover,.pc-btn:focus-visible{background:var(--lime);color:var(--earth)}
+
+/* =============================================
+   FARMER ROW CARD
+============================================= */
+.farmer-card-list{padding:0 14px}
+.fc{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--rl);
+  padding:14px 16px;margin-bottom:10px;
+  display:flex;align-items:center;gap:12px;
+  transition:box-shadow var(--tr);cursor:pointer;
+}
+.fc:hover{box-shadow:var(--shadow)}
+.fc-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0}
+.fc-av-g{background:#d4f5e4;color:#0a5c38}
+.fc-av-b{background:#ddeeff;color:#0a3f70}
+.fc-av-a{background:#fef5e4;color:#7a4500}
+.fc-av-r{background:#fde8e2;color:#8a1a05}
+.fc-av-t{background:#d4f0ed;color:#07524a}
+.fc-info{flex:1}
+.fc-name{font-size:14px;font-weight:800;color:var(--ink)}
+.fc-meta{font-size:12px;color:var(--ash);font-family:'Literata',serif;margin-top:2px;display:flex;align-items:center;gap:5px}
+.fc-meta i{font-size:14px}
+.fc-right{text-align:right}
+.fc-income{font-size:16px;font-weight:900;color:var(--forest)}
+.fc-status{font-size:11px;margin-top:3px}
+
+/* =============================================
+   PAYMENT FLOW
+============================================= */
+.mpesa-card{
+  margin:14px;
+  background:linear-gradient(135deg,var(--earth) 0%,var(--forest) 100%);
+  border-radius:var(--rl);padding:20px;color:var(--white);
+  position:relative;overflow:hidden;
+}
+.mpesa-card::before{content:'';position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.04)}
+.mc-label{font-size:10px;opacity:.5;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.mc-amount{font-size:38px;font-weight:900;color:var(--lime);letter-spacing:-1px;margin-bottom:3px}
+.mc-sub{font-size:12px;opacity:.55;font-family:'Literata',serif}
+.mc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
+.mc-stat-val{font-size:17px;font-weight:900}
+.mc-stat-lbl{font-size:10px;opacity:.45;margin-top:2px;font-family:'Literata',serif}
+
+/* =============================================
+   FORMS
+============================================= */
+.form-wrap{padding:14px}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.fg label{font-size:12px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em}
+.fg input,.fg select,.fg textarea{
+  padding:13px 15px;border:2px solid var(--border);border-radius:12px;
+  font-size:15px;font-family:'Cabinet Grotesk',sans-serif;color:var(--ink);background:var(--white);
+  transition:all var(--tr);
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{
+  outline:none;border-color:var(--leaf);background:var(--mist);
+  box-shadow:0 0 0 4px rgba(18,160,92,.10);
+}
+.fg textarea{resize:vertical;min-height:90px}
+.fg .hint{font-size:11px;color:var(--ash);font-family:'Literata',serif}
+.fg select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a9088' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+
+/* =============================================
+   BUTTONS
+============================================= */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;border-radius:12px;font-size:15px;font-weight:800;font-family:'Cabinet Grotesk',sans-serif;transition:all var(--tr);border:none;cursor:pointer;width:100%}
+.btn-primary{background:var(--leaf);color:var(--white);box-shadow:0 4px 16px rgba(18,160,92,.3)}
+.btn-primary:hover,.btn-primary:focus-visible{background:var(--forest);box-shadow:0 6px 22px rgba(10,92,56,.4);transform:translateY(-1px)}
+.btn-secondary{background:var(--mist);color:var(--forest);border:2px solid var(--mint)}
+.btn-secondary:hover,.btn-secondary:focus-visible{background:var(--mint)}
+.btn-gold{background:var(--gold);color:var(--white);box-shadow:0 4px 16px rgba(201,123,10,.3)}
+.btn-gold:hover,.btn-gold:focus-visible{background:#a86200;transform:translateY(-1px)}
+.btn-danger{background:var(--clay);color:var(--rust);border:1.5px solid #f0c0a8}
+.btn i{font-size:20px}
+
+/* =============================================
+   PROGRESS BARS
+============================================= */
+.prog{margin-bottom:12px}
+.prog-hd{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;font-weight:600}
+.prog-hd .lbl{color:var(--ink2)}
+.prog-hd .val{color:var(--ink);font-weight:800}
+.prog-bar{height:9px;background:#e4ede9;border-radius:5px;overflow:hidden}
+.prog-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--leaf),var(--lime));transition:width 1.4s cubic-bezier(.4,0,.2,1)}
+.prog-fill.amber{background:linear-gradient(90deg,var(--gold),var(--sun))}
+.prog-fill.sky{background:linear-gradient(90deg,var(--sky),#4da0e8)}
+
+/* =============================================
+   BADGES / PILLS
+============================================= */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800}
+.pill-green{background:#d4f5e4;color:#0a5c38}
+.pill-amber{background:#fef5e4;color:#7a4500}
+.pill-blue{background:#ddeeff;color:#0a3f70}
+.pill-red{background:#fde8e2;color:#8a1a05}
+.pill-gray{background:#eaeeec;color:#3a5247}
+.pill-lime{background:var(--lime);color:var(--earth)}
+
+/* =============================================
+   HUB CARDS
+============================================= */
+.hub-card{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--rl);
+  padding:16px;margin-bottom:10px;cursor:pointer;transition:all var(--tr);
+}
+.hub-card:hover{box-shadow:var(--shadow);border-color:var(--mint)}
+.hc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.hc-icon{width:44px;height:44px;border-radius:12px;background:var(--mist);display:flex;align-items:center;justify-content:center}
+.hc-icon i{font-size:22px;color:var(--forest)}
+.hc-name{font-size:15px;font-weight:800;color:var(--ink)}
+.hc-loc{font-size:12px;color:var(--ash);font-family:'Literata',serif;margin-top:2px;display:flex;align-items:center;gap:4px}
+.hc-loc i{font-size:14px}
+.hc-operator{font-size:12px;color:var(--ink2);margin-top:6px;display:flex;align-items:center;gap:5px}
+.hc-operator i{font-size:15px;color:var(--leaf)}
+.hc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;background:var(--bone);border-radius:10px;padding:10px;margin-top:10px}
+.hcs{text-align:center}
+.hcs-val{font-size:15px;font-weight:900;color:var(--forest)}
+.hcs-lbl{font-size:10px;color:var(--ash);font-family:'Literata',serif;margin-top:1px}
+
+/* =============================================
+   NOTIFICATION ITEMS
+============================================= */
+.notif-item{
+  padding:14px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:background var(--tr);
+}
+.notif-item:hover{background:var(--mist)}
+.notif-item.unread{border-left:3px solid var(--leaf)}
+.ni-ico{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.ni-title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:2px}
+.ni-body{font-size:12px;color:var(--ash);font-family:'Literata',serif;line-height:1.5}
+.ni-time{font-size:10px;color:var(--ash);margin-top:4px;font-family:'Literata',serif}
+
+/* =============================================
+   TOAST
+============================================= */
+#toast{
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(80px);
+  max-width:360px;width:90%;
+  background:var(--earth);color:var(--white);
+  padding:13px 18px;border-radius:14px;
+  font-size:13px;font-weight:600;
+  box-shadow:var(--shadow-lg);z-index:9999;
+  display:flex;align-items:center;gap:10px;
+  opacity:0;transition:all .38s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
+#toast i{font-size:20px;color:var(--lime);flex-shrink:0}
+
+/* =============================================
+   MODALS
+============================================= */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(10,30,18,.6);z-index:500;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .28s;
+}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal-sheet{
+  background:var(--white);border-radius:22px 22px 0 0;
+  padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);
+}
+.modal-bg.open .modal-sheet{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 18px}
+.modal-title{font-size:20px;font-weight:900;color:var(--ink);margin-bottom:16px}
+.modal-close-btn{float:right;width:32px;height:32px;border-radius:8px;background:var(--bone);display:flex;align-items:center;justify-content:center;color:var(--ash);cursor:pointer;transition:all var(--tr)}
+.modal-close-btn:hover{background:var(--clay);color:var(--rust)}
+.modal-close-btn i{font-size:18px}
+
+/* =============================================
+   STEP TRACKER
+============================================= */
+.steps{display:flex;align-items:center;padding:16px 18px;gap:0;margin-bottom:4px}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.step::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--border);z-index:0}
+.step:last-child::after{display:none}
+.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--ash);z-index:1;transition:all var(--tr)}
+.step.done .step-dot{background:var(--leaf);border-color:var(--leaf);color:var(--white)}
+.step.done::after{background:var(--leaf)}
+.step.active .step-dot{background:var(--lime);border-color:var(--leaf);color:var(--earth)}
+.step-lbl{font-size:9px;font-weight:700;color:var(--ash);text-align:center;text-transform:uppercase;letter-spacing:.04em}
+.step.active .step-lbl,.step.done .step-lbl{color:var(--forest)}
+
+/* =============================================
+   SEARCH BAR
+============================================= */
+.search-bar{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bone);border:2px solid var(--border);border-radius:14px;
+  padding:11px 15px;margin:14px;
+  transition:all var(--tr);
+}
+.search-bar:focus-within{border-color:var(--leaf);background:var(--white)}
+.search-bar i{font-size:20px;color:var(--ash)}
+.search-bar input{border:none;background:transparent;outline:none;font-size:14px;font-family:'Cabinet Grotesk',sans-serif;color:var(--ink);width:100%;font-weight:500}
+.search-bar input::placeholder{color:var(--ash)}
+
+/* =============================================
+   STAT STRIP
+============================================= */
+.stat-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 14px;margin-bottom:14px}
+.ss{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+.ss-ico{font-size:22px;display:block;margin-bottom:6px}
+.ss-val{font-size:18px;font-weight:900;color:var(--ink);line-height:1}
+.ss-lbl{font-size:10px;color:var(--ash);font-family:'Literata',serif;margin-top:3px}
+
+/* =============================================
+   FILTER CHIPS
+============================================= */
+.filter-chips{display:flex;gap:8px;padding:0 18px 12px;overflow-x:auto;scrollbar-width:none}
+.filter-chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--border);background:var(--white);color:var(--ash);cursor:pointer;transition:all var(--tr)}
+.chip.active,.chip:hover{background:var(--forest);color:var(--white);border-color:var(--forest)}
+
+/* =============================================
+   DIVIDERS & MISC
+============================================= */
+.divider{height:8px;background:var(--bone);margin:8px 0}
+.card-simple{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin:0 14px 12px}
+.cs-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cs-title{font-size:15px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:7px}
+.cs-title i{font-size:20px;color:var(--leaf)}
+.cs-action{font-size:12px;font-weight:700;color:var(--leaf)}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bone);font-size:13px}
+.stat-row:last-child{border-bottom:none}
+.sr-label{color:var(--ash);font-family:'Literata',serif}
+.sr-val{font-weight:800;color:var(--ink)}
+.live-dot{display:inline-block;width:7px;height:7px;background:var(--lime);border-radius:50%;animation:pulse 1.8s ease infinite;margin-right:4px;vertical-align:1px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* =============================================
+   IMPACT SECTION
+============================================= */
+.impact-card{
+  margin:14px;background:linear-gradient(135deg,#f9f2e8,#fef5e4);
+  border:1.5px solid #f0d8a8;border-radius:var(--rl);padding:18px;
+}
+.ic-title{font-size:14px;font-weight:800;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.ic-title i{font-size:18px}
+
+/* =============================================
+   EMPTY STATE
+============================================= */
+.empty-state{padding:40px 20px;text-align:center}
+.empty-icon{font-size:52px;color:var(--mint);display:block;margin-bottom:12px}
+.empty-title{font-size:17px;font-weight:800;color:var(--ink);margin-bottom:6px}
+.empty-sub{font-size:13px;color:var(--ash);font-family:'Literata',serif;line-height:1.6}
+
+/* =============================================
+   CHART
+============================================= */
+.chart-container{padding:0 14px;margin-bottom:14px}
+.chart-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:16px}
+.cw-title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.cw-title i{font-size:17px;color:var(--leaf)}
+</style>
+
+</head><body>
+<!-- =============================================
+     SPLASH
+============================================= -->
+<div id="splash">
+  <div class="splash-logo"><i class="ti ti-plant-2"></i></div>
+  <div class="splash-name">SAM-LiMP</div>
+  <div class="splash-tag">Shamba yako, Bei yako · Your Farm, Your Price</div>
+  <div class="splash-loader"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" role="alert" aria-live="polite"><i class="ti ti-circle-check"></i><span id="tmsg">Done!</span></div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="closeMod(event)">
+  <div class="modal-sheet" id="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ============ TOPBAR ============ -->
+  <header class="topbar">
+    <div class="tb-logo">
+      <div class="tb-logo-mark"><i class="ti ti-plant-2"></i></div>
+      <span class="tb-logo-text">SAM-LiMP</span>
+    </div>
+    <div class="tb-right">
+      <button class="tb-btn" onclick="goPage('notifications')" aria-label="Notifications (3 unread)">
+        <i class="ti ti-bell"></i>
+        <span class="tb-badge" aria-hidden="true"></span>
+      </button>
+      <button class="tb-btn" onclick="openProfileMod()" aria-label="My profile">
+        <i class="ti ti-user-circle"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ PAGES ============ -->
+
+  <!-- =================== HOME =================== -->
+  <section id="page-home" class="page active" aria-label="Home">
+
+    <div class="greeting-bar">
+      <div>
+        <div class="gb-left">Habari yako, <span id="user-salute">mkulima</span> 👋</div>
+        <div class="gb-name" id="user-display-name">Jane Wambui</div>
+      </div>
+      <div class="gb-mpesa" onclick="goPage('payments')" role="button" tabindex="0" aria-label="Check earnings">
+        <i class="ti ti-cash" style="font-size:13px;vertical-align:-2px"></i> KES 11,800 this season
+      </div>
+    </div>
+
+    <!-- HERO BANNER -->
+    <div class="hero-banner" role="banner">
+      <div class="hb-eyebrow"><span class="live-dot"></span>Live marketplace</div>
+      <h1 class="hb-title">Skip the middleman.<br/>Sell directly. Earn more.</h1>
+      <p class="hb-sub">Post your harvest, connect with verified buyers, get paid via M-Pesa instantly.</p>
+      <button class="hb-cta" onclick="openSellMod()"><i class="ti ti-plus"></i>Sell my harvest</button>
+      <div class="hb-stats">
+        <div class="hb-stat"><div class="hb-stat-val">1,247</div><div class="hb-stat-lbl">Farmers</div></div>
+        <div class="hb-stat"><div class="hb-stat-val">84</div><div class="hb-stat-lbl">Buyers</div></div>
+        <div class="hb-stat"><div class="hb-stat-val">KES 4.1M</div><div class="hb-stat-lbl">Paid out</div></div>
+      </div>
+    </div>
+
+    <!-- INCOME STRIP -->
+    <div class="income-strip" role="region" aria-label="Income comparison">
+      <div class="is-left">
+        <div class="is-tag">Before SAM-LiMP</div>
+        <div class="is-val">KES 4,200</div>
+        <div class="is-sub">Selling raw to brokers</div>
+      </div>
+      <div class="is-arrow" aria-hidden="true">→</div>
+      <div class="is-right">
+        <div class="is-tag">With SAM-LiMP</div>
+        <div class="is-val">KES 11,800</div>
+        <div class="is-sub">2.8× more income per month</div>
+      </div>
+    </div>
+
+    <!-- FEATURED LISTINGS -->
+    <div class="sec-hd">
+      <span class="sec-title">Hot listings <span class="live-dot"></span></span>
+      <span class="sec-link" onclick="goPage('market')" role="button" tabindex="0">See all <i class="ti ti-chevron-right" style="font-size:14px"></i></span>
+    </div>
+    <div class="produce-scroll" role="list" id="home-listings"></div>
+
+    <!-- IMPACT -->
+    <div class="impact-card" role="region" aria-label="Platform impact">
+      <div class="ic-title"><i class="ti ti-award"></i>Platform impact this season</div>
+      <div class="prog"><div class="prog-hd"><span class="lbl">Post-harvest loss reduced</span><span class="val">8.2% ↓ from 42%</span></div><div class="prog-bar"><div class="prog-fill" style="width:82%"></div></div></div>
+      <div class="prog"><div class="prog-hd"><span class="lbl">Youth jobs created</span><span class="val">312 operators</span></div><div class="prog-bar"><div class="prog-fill amber" style="width:62%"></div></div></div>
+      <div class="prog"><div class="prog-hd"><span class="lbl">Farmers earning 2×+ more</span><span class="val">78% of members</span></div><div class="prog-bar"><div class="prog-fill sky" style="width:78%"></div></div></div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="sec-hd"><span class="sec-title">Quick actions</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;margin-bottom:16px">
+      <button class="btn btn-primary" onclick="openSellMod()"><i class="ti ti-plant-2"></i>Sell Harvest</button>
+      <button class="btn btn-secondary" onclick="goPage('market')"><i class="ti ti-shopping-bag"></i>Buy Produce</button>
+      <button class="btn btn-gold" onclick="goPage('payments')"><i class="ti ti-device-mobile"></i>M-Pesa Pay</button>
+      <button class="btn btn-secondary" onclick="goPage('hubs')"><i class="ti ti-building-warehouse"></i>Find Hub</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- NEARBY HUBS -->
+    <div class="sec-hd">
+      <span class="sec-title">Hubs near you</span>
+      <span class="sec-link" onclick="goPage('hubs')" role="button" tabindex="0">All hubs <i class="ti ti-chevron-right" style="font-size:14px"></i></span>
+    </div>
+    <div class="farmer-card-list">
+      <div class="hub-card" onclick="openHubDetail('Kiambu Hub 1')">
+        <div class="hc-top">
+          <div class="hc-icon"><i class="ti ti-building-warehouse"></i></div>
+          <span class="pill pill-green">Open</span>
+        </div>
+        <div class="hc-name">Kiambu Hub 1</div>
+        <div class="hc-loc"><i class="ti ti-map-pin"></i>2.4 km · Kiambu Town</div>
+        <div class="hc-operator"><i class="ti ti-user-check"></i>Operated by Peter Njoroge</div>
+        <div class="hc-stats">
+          <div class="hcs"><div class="hcs-val">62</div><div class="hcs-lbl">Farmers</div></div>
+          <div class="hcs"><div class="hcs-val">2 T</div><div class="hcs-lbl">Weekly cap</div></div>
+          <div class="hcs"><div class="hcs-val">KES 78K</div><div class="hcs-lbl">Monthly rev</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== MARKET =================== -->
+  <section id="page-market" class="page" aria-label="Marketplace">
+    <div class="greeting-bar" style="padding:14px 18px">
+      <div class="gb-name" style="font-size:18px">Produce Marketplace</div>
+      <span class="pill pill-lime"><span class="live-dot" style="background:var(--earth)"></span>43 Live</span>
+    </div>
+
+    <div class="search-bar" role="search">
+      <i class="ti ti-search"></i>
+      <input type="search" id="mkt-search" placeholder="Search maize, tomatoes, avocado…" aria-label="Search produce"/>
+    </div>
+
+    <div class="filter-chips" role="list">
+      <div class="chip active" onclick="filterChip(this,'all')" role="listitem" tabindex="0">All</div>
+      <div class="chip" onclick="filterChip(this,'processed')" role="listitem" tabindex="0">Processed</div>
+      <div class="chip" onclick="filterChip(this,'fresh')" role="listitem" tabindex="0">Fresh</div>
+      <div class="chip" onclick="filterChip(this,'grains')" role="listitem" tabindex="0">Grains</div>
+      <div class="chip" onclick="filterChip(this,'oils')" role="listitem" tabindex="0">Oils</div>
+      <div class="chip" onclick="filterChip(this,'urgent')" role="listitem" tabindex="0">🔥 Urgent</div>
+    </div>
+
+    <div class="stat-strip">
+      <div class="ss"><span class="ss-ico">🛒</span><div class="ss-val">43</div><div class="ss-lbl">Live listings</div></div>
+      <div class="ss"><span class="ss-ico">💰</span><div class="ss-val">+67%</div><div class="ss-lbl">Price premium</div></div>
+      <div class="ss"><span class="ss-ico">👥</span><div class="ss-val">12</div><div class="ss-lbl">Buyers online</div></div>
+    </div>
+
+    <div style="padding:0 14px;margin-bottom:10px">
+      <button class="btn btn-primary" onclick="openSellMod()"><i class="ti ti-plus"></i>Post your produce for sale</button>
+    </div>
+
+    <div class="sec-hd" style="margin-top:6px"><span class="sec-title">All listings</span></div>
+    <div id="market-grid" style="padding:0 14px"></div>
+  </section>
+
+  <!-- =================== MY FARM =================== -->
+  <section id="page-farm" class="page" aria-label="My farm">
+    <div class="greeting-bar" style="padding:14px 18px">
+      <div class="gb-name" style="font-size:18px">My Farm</div>
+      <span class="pill pill-green">Verified ✓</span>
+    </div>
+
+    <!-- MY PROFILE CARD -->
+    <div class="card-simple" style="margin-top:14px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div class="fc-av fc-av-g" style="width:56px;height:56px;font-size:20px">JW</div>
+        <div>
+          <div style="font-size:18px;font-weight:900;color:var(--ink)">Jane Wambui</div>
+          <div style="font-size:13px;color:var(--ash);font-family:'Literata',serif">Farmer ID: KE-0712-2024 · Kiambu</div>
+          <div style="margin-top:6px;display:flex;gap:6px">
+            <span class="pill pill-green">Active</span>
+            <span class="pill pill-blue">Verified</span>
+          </div>
+        </div>
+      </div>
+      <div class="stat-row"><span class="sr-label">M-Pesa phone</span><span class="sr-val">0712 *** 842</span></div>
+      <div class="stat-row"><span class="sr-label">County</span><span class="sr-val">Kiambu</span></div>
+      <div class="stat-row"><span class="sr-label">Nearest hub</span><span class="sr-val">Kiambu Hub 1 (2.4 km)</span></div>
+      <div class="stat-row"><span class="sr-label">Primary crop</span><span class="sr-val">Tomatoes</span></div>
+      <div class="stat-row"><span class="sr-label">Land size</span><span class="sr-val">3 acres</span></div>
+      <div class="stat-row"><span class="sr-label">Member since</span><span class="sr-val">March 2024</span></div>
+    </div>
+
+    <!-- EARNINGS -->
+    <div class="card-simple">
+      <div class="cs-hd">
+        <span class="cs-title"><i class="ti ti-chart-line"></i>My earnings this season</span>
+      </div>
+      <div style="background:linear-gradient(135deg,var(--forest),#0d7a47);border-radius:12px;padding:16px;color:var(--white);margin-bottom:12px">
+        <div style="font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Total earned</div>
+        <div style="font-size:34px;font-weight:900;color:var(--lime);letter-spacing:-1px">KES 47,200</div>
+        <div style="font-size:12px;opacity:.55;font-family:'Literata',serif">Long Rains Season 2026 · 4 sales</div>
+      </div>
+      <div class="stat-row"><span class="sr-label">Last payment</span><span class="sr-val" style="color:var(--forest);font-weight:800">KES 17,000</span></div>
+      <div class="stat-row"><span class="sr-label">Avg price premium</span><span class="sr-val" style="color:var(--forest)">+79% vs brokers</span></div>
+      <div class="stat-row"><span class="sr-label">Post-harvest loss</span><span class="sr-val" style="color:var(--rust)">5.2% this season</span></div>
+    </div>
+
+    <!-- MY PRODUCE -->
+    <div class="card-simple">
+      <div class="cs-hd">
+        <span class="cs-title"><i class="ti ti-plant-2"></i>My produce</span>
+        <span class="cs-action" onclick="openSellMod()">+ Add harvest</span>
+      </div>
+      <div class="fc" onclick="openSellMod()">
+        <div class="fc-av fc-av-g"><i class="ti ti-plant-2" style="font-size:20px"></i></div>
+        <div class="fc-info">
+          <div class="fc-name">Tomato paste (processed)</div>
+          <div class="fc-meta"><i class="ti ti-package"></i>200 kg · Kiambu Hub 2</div>
+        </div>
+        <div class="fc-right">
+          <div class="fc-income">KES 85/kg</div>
+          <div class="fc-status"><span class="pill pill-blue">Open bid</span></div>
+        </div>
+      </div>
+      <div class="fc" style="opacity:.5">
+        <div class="fc-av fc-av-a"><i class="ti ti-package" style="font-size:20px"></i></div>
+        <div class="fc-info">
+          <div class="fc-name">Fresh tomatoes</div>
+          <div class="fc-meta"><i class="ti ti-check"></i>Sold — March 2026</div>
+        </div>
+        <div class="fc-right">
+          <div class="fc-income">KES 18,000</div>
+          <div class="fc-status"><span class="pill pill-green">Paid ✓</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="sec-hd"><span class="sec-title">New to SAM-LiMP?</span></div>
+    <div style="padding:0 14px;margin-bottom:14px">
+      <button class="btn btn-secondary" onclick="openRegMod()"><i class="ti ti-user-plus"></i>Register as a farmer — it's free</button>
+    </div>
+  </section>
+
+  <!-- =================== HUBS =================== -->
+  <section id="page-hubs" class="page" aria-label="Processing hubs">
+    <div class="greeting-bar" style="padding:14px 18px">
+      <div class="gb-name" style="font-size:18px">Processing Hubs</div>
+      <span class="pill pill-lime">14 Active</span>
+    </div>
+
+    <div class="search-bar" role="search">
+      <i class="ti ti-search"></i>
+      <input type="search" placeholder="Search by county or hub name…" aria-label="Search hubs"/>
+    </div>
+
+    <!-- WHAT IS A HUB? -->
+    <div class="impact-card" style="margin:0 14px 14px">
+      <div class="ic-title"><i class="ti ti-info-circle"></i>What is a processing hub?</div>
+      <p style="font-size:13px;color:var(--ink2);line-height:1.7">Hubs are community centres where your raw produce is weighed, processed (dried, milled, packaged) and connected to direct buyers — so you earn <strong>2–5× more</strong> than selling raw at the roadside.</p>
+    </div>
+
+    <div class="sec-hd"><span class="sec-title">Hubs near you</span></div>
+    <div class="farmer-card-list" id="hub-list"></div>
+
+    <div class="sec-hd"><span class="sec-title">Want to run a hub?</span></div>
+    <div style="padding:0 14px;margin-bottom:20px">
+      <div class="card-simple">
+        <p style="font-size:13px;color:var(--ink2);font-family:'Literata',serif;margin-bottom:14px;line-height:1.7">Hub operators earn on average <strong>KES 85,000/month</strong> and create employment for 2–3 youth. Investment pays back in as little as <strong>4 months</strong>.</p>
+        <button class="btn btn-gold" onclick="openHubApplyMod()"><i class="ti ti-send"></i>Apply to open a hub</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== PAYMENTS =================== -->
+  <section id="page-payments" class="page" aria-label="Payments">
+    <div class="greeting-bar" style="padding:14px 18px">
+      <div class="gb-name" style="font-size:18px">M-Pesa Payments</div>
+      <span class="pill pill-lime">98.4% success</span>
+    </div>
+
+    <!-- MPESA HERO -->
+    <div class="mpesa-card" role="region" aria-label="Payment summary">
+      <div class="mc-label">My total earnings this season</div>
+      <div class="mc-amount">KES 47,200</div>
+      <div class="mc-sub">4 payments · Long Rains 2026 · via M-Pesa</div>
+      <div class="mc-stats">
+        <div class="mc-stat"><div class="mc-stat-val">4</div><div class="mc-stat-lbl">Sales</div></div>
+        <div class="mc-stat"><div class="mc-stat-val">KES 11.8K</div><div class="mc-stat-lbl">Avg income/mo</div></div>
+        <div class="mc-stat"><div class="mc-stat-val">&lt;30s</div><div class="mc-stat-lbl">Payment speed</div></div>
+      </div>
+    </div>
+
+    <!-- RECENT PAYMENTS -->
+    <div class="card-simple">
+      <div class="cs-hd">
+        <span class="cs-title"><i class="ti ti-clock"></i>My payment history</span>
+      </div>
+      <div class="fc">
+        <div class="fc-av fc-av-g"><i class="ti ti-device-mobile" style="font-size:20px"></i></div>
+        <div class="fc-info">
+          <div class="fc-name">Tomato paste sale</div>
+          <div class="fc-meta"><i class="ti ti-calendar"></i>5 June 2026 · Kiambu Hub 2</div>
+        </div>
+        <div class="fc-right">
+          <div class="fc-income" style="color:var(--forest)">+KES 17,000</div>
+          <div class="fc-status"><span class="pill pill-green">Paid</span></div>
+        </div>
+      </div>
+      <div class="fc">
+        <div class="fc-av fc-av-b"><i class="ti ti-device-mobile" style="font-size:20px"></i></div>
+        <div class="fc-info">
+          <div class="fc-name">Fresh tomatoes (bulk)</div>
+          <div class="fc-meta"><i class="ti ti-calendar"></i>12 May 2026 · Kiambu Hub 1</div>
+        </div>
+        <div class="fc-right">
+          <div class="fc-income" style="color:var(--forest)">+KES 18,000</div>
+          <div class="fc-status"><span class="pill pill-green">Paid</span></div>
+        </div>
+      </div>
+      <div class="fc">
+        <div class="fc-av fc-av-a"><i class="ti ti-device-mobile" style="font-size:20px"></i></div>
+        <div class="fc-info">
+          <div class="fc-name">Tomato paste (50kg)</div>
+          <div class="fc-meta"><i class="ti ti-calendar"></i>22 April 2026</div>
+        </div>
+        <div class="fc-right">
+          <div class="fc-income" style="color:var(--forest)">+KES 7,200</div>
+          <div class="fc-status"><span class="pill pill-green">Paid</span></div>
+        </div>
+      </div>
+      <div class="fc">
+        <div class="fc-av fc-av-t"><i class="ti ti-device-mobile" style="font-size:20px"></i></div>
+        <div class="fc-info">
+          <div class="fc-name">First harvest sale</div>
+          <div class="fc-meta"><i class="ti ti-calendar"></i>3 March 2026</div>
+        </div>
+        <div class="fc-right">
+          <div class="fc-income" style="color:var(--forest)">+KES 5,000</div>
+          <div class="fc-status"><span class="pill pill-green">Paid</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VALUE ADDITION -->
+    <div class="card-simple">
+      <div class="cs-hd"><span class="cs-title"><i class="ti ti-chart-bar"></i>Income gain by crop type</span></div>
+      <div id="pay-crop-bars"></div>
+    </div>
+
+    <!-- MPESA TIPS -->
+    <div class="card-simple" style="background:var(--mist);border-color:var(--mint)">
+      <div class="cs-title" style="margin-bottom:10px"><i class="ti ti-shield-check"></i>Payment security tips</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="font-size:13px;font-family:'Literata',serif;color:var(--ink2);display:flex;align-items:flex-start;gap:8px"><i class="ti ti-check" style="color:var(--leaf);font-size:16px;flex-shrink:0;margin-top:1px"></i>Never share your M-Pesa PIN with anyone</li>
+        <li style="font-size:13px;font-family:'Literata',serif;color:var(--ink2);display:flex;align-items:flex-start;gap:8px"><i class="ti ti-check" style="color:var(--leaf);font-size:16px;flex-shrink:0;margin-top:1px"></i>All payments go through SAM-LiMP's verified system</li>
+        <li style="font-size:13px;font-family:'Literata',serif;color:var(--ink2);display:flex;align-items:flex-start;gap:8px"><i class="ti ti-check" style="color:var(--leaf);font-size:16px;flex-shrink:0;margin-top:1px"></i>You receive an SMS confirmation for every payment</li>
+        <li style="font-size:13px;font-family:'Literata',serif;color:var(--ink2);display:flex;align-items:flex-start;gap:8px"><i class="ti ti-check" style="color:var(--leaf);font-size:16px;flex-shrink:0;margin-top:1px"></i>Payments arrive within 30 seconds of sale confirmation</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =================== NOTIFICATIONS =================== -->
+  <section id="page-notifications" class="page" aria-label="Notifications">
+    <div class="greeting-bar" style="padding:14px 18px">
+      <div class="gb-name" style="font-size:18px">Notifications</div>
+      <span class="cs-action" onclick="showToast('All marked as read')">Mark all read</span>
+    </div>
+    <div id="notif-list"></div>
+  </section>
+
+  <!-- ============ BOTTOM NAV ============ -->
+  <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+    <div class="bn-item active" id="bn-home" onclick="goPage('home')" role="button" tabindex="0" aria-label="Home">
+      <i class="ti ti-home-2"></i>
+      <span class="bn-label">Home</span>
+      <div class="bn-active-bar"></div>
+    </div>
+    <div class="bn-item" id="bn-market" onclick="goPage('market')" role="button" tabindex="0" aria-label="Marketplace">
+      <i class="ti ti-shopping-bag"></i>
+      <span class="bn-label">Market</span>
+    </div>
+    <div class="bn-item" id="bn-farm" onclick="goPage('farm')" role="button" tabindex="0" aria-label="My farm">
+      <i class="ti ti-plant-2"></i>
+      <span class="bn-label">My Farm</span>
+    </div>
+    <div class="bn-item" id="bn-hubs" onclick="goPage('hubs')" role="button" tabindex="0" aria-label="Processing hubs">
+      <i class="ti ti-building-warehouse"></i>
+      <span class="bn-label">Hubs</span>
+    </div>
+    <div class="bn-item" id="bn-payments" onclick="goPage('payments')" role="button" tabindex="0" aria-label="My payments">
+      <i class="ti ti-cash"></i>
+      <span class="bn-label">Payments</span>
+    </div>
+  </nav>
+
+</div><!-- /app -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// =============================================
+// DATA
+// =============================================
+const LISTINGS = [
+  { id:1, name:'Tomato paste', type:'processed', badge:'pc-b-processed', badgeLabel:'Processed',
+    hub:'Kiambu Hub 2', qty:200, price:85, farmer:'Jane Wambui', status:'Open bid', sc:'pill-blue', category:'processed' },
+  { id:2, name:'Dried avocado slices', type:'processed', badge:'pc-b-processed', badgeLabel:'Processed',
+    hub:'Meru Hub 1', qty:80, price:340, farmer:'Faith Karimi', status:'Negotiating', sc:'pill-amber', category:'oils' },
+  { id:3, name:'Maize flour (Grade A)', type:'processed', badge:'pc-b-processed', badgeLabel:'Processed',
+    hub:'Kakamega Hub', qty:500, price:55, farmer:'Moses Odhiambo', status:'Open bid', sc:'pill-blue', category:'grains' },
+  { id:4, name:'Fresh kale bundles', type:'fresh', badge:'pc-b-fresh', badgeLabel:'Fresh',
+    hub:'Nakuru Hub 3', qty:300, price:28, farmer:'Various', status:'🔥 Urgent', sc:'pill-red', category:'fresh' },
+  { id:5, name:'Potato chips (unfried)', type:'processed', badge:'pc-b-processed', badgeLabel:'Processed',
+    hub:'Nakuru Hub 1', qty:150, price:120, farmer:'Alice Kipchumba', status:'Open bid', sc:'pill-blue', category:'processed' },
+  { id:6, name:'Avocado oil (cold-pressed)', type:'processed', badge:'pc-b-processed', badgeLabel:'Processed',
+    hub:'Meru Hub 2', qty:40, price:850, farmer:'Faith Karimi', status:'Exclusive', sc:'pill-blue', category:'oils' },
+  { id:7, name:'Roasted coffee beans', type:'processed', badge:'pc-b-processed', badgeLabel:'Processed',
+    hub:'Kiambu Hub 1', qty:25, price:420, farmer:'David Mutua', status:'Open bid', sc:'pill-blue', category:'processed' },
+  { id:8, name:'Packaged bean flour', type:'processed', badge:'pc-b-processed', badgeLabel:'Processed',
+    hub:'Kisii Hub', qty:200, price:70, farmer:'Grace Mosoti', status:'Open bid', sc:'pill-blue', category:'grains' },
+];
+
+const HUBS = [
+  { name:'Kiambu Hub 1', county:'Kiambu', dist:'2.4 km', operator:'Peter Njoroge', farmers:62, cap:'2 T', rev:'KES 78K', status:'open', note:'Specialises in tomato paste & dried produce' },
+  { name:'Kiambu Hub 2', county:'Kiambu', dist:'4.1 km', operator:'Mary Wanjiku', farmers:58, cap:'1.5 T', rev:'KES 64K', status:'open', note:'Fresh produce aggregation & cold storage' },
+  { name:'Nakuru Hub 1', county:'Nakuru', dist:'8.2 km', operator:'James Mwangi', farmers:72, cap:'3 T', rev:'KES 102K', status:'open', note:'Maize milling and grain packaging' },
+  { name:'Nakuru Hub 3', county:'Nakuru', dist:'9.5 km', operator:'Samuel Koech', farmers:48, cap:'1.5 T', rev:'KES 71K', status:'full', note:'At full capacity — call before bringing produce' },
+  { name:'Meru Hub 1', county:'Meru', dist:'14 km', operator:'Diana Nkatha', farmers:71, cap:'2.5 T', rev:'KES 89K', status:'open', note:'Avocado oil extraction & dried fruit' },
+  { name:'Kakamega Hub', county:'Kakamega', dist:'18 km', operator:'Lilian Nafula', farmers:89, cap:'4 T', rev:'KES 134K', status:'open', note:'Largest hub — handles all crop types' },
+];
+
+const NOTIFS = [
+  { icon:'ti-cash', ico_bg:'#d4f5e4', ico_color:'#0a5c38', title:'Payment received!', body:'KES 17,000 deposited to your M-Pesa (0712 *** 842) for tomato paste sale.', time:'10 minutes ago', unread:true },
+  { icon:'ti-gavel', ico_bg:'#ddeeff', ico_color:'#0a3f70', title:'New bid on your listing', body:'Naivas Distributors placed a bid of KES 88/kg on your Tomato Paste 200kg listing. Review and accept.', time:'1 hour ago', unread:true },
+  { icon:'ti-alert-triangle', ico_bg:'#fde8e2', ico_color:'#8a1a05', title:'Kale listing expires in 4 hours', body:'Your fresh kale bundle listing (300kg) will expire soon. Lower price or contact a buyer directly.', time:'2 hours ago', unread:true },
+  { icon:'ti-star', ico_bg:'#fef5e4', ico_color:'#7a4500', title:'Hub tip: add value to earn more', body:'Kiambu Hub 1 can process your next tomato harvest into paste — earn KES 85/kg instead of KES 18/kg.', time:'Yesterday', unread:false },
+  { icon:'ti-cloud-rain', ico_bg:'#d4f0ed', ico_color:'#07524a', title:'Weather alert for Kiambu', body:'Light rains expected this week. Good time to harvest and bring produce to the hub before soil moisture affects quality.', time:'Yesterday', unread:false },
+  { icon:'ti-users', ico_bg:'#ede8ff', ico_color:'#4a1fa0', title:'2 new buyers joined your area', body:'Naivas Distributors and Fresh Choice Supermarket are now buying in Kiambu. They prefer processed tomatoes.', time:'2 days ago', unread:false },
+];
+
+const CROPS = [
+  { name:'Coffee', from:30, to:420, pct:93 },
+  { name:'Avocado', from:25, to:340, pct:92 },
+  { name:'Tomatoes', from:18, to:85, pct:79 },
+  { name:'Potatoes', from:15, to:120, pct:77 },
+  { name:'Maize', from:12, to:55, pct:73 },
+  { name:'Kale', from:8, to:28, pct:71 },
+];
+
+// =============================================
+// NAV
+// =============================================
+const PAGE_MAP = {
+  home:'bn-home', market:'bn-market', farm:'bn-farm',
+  hubs:'bn-hubs', payments:'bn-payments', notifications:null
+};
+
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  const bnId = PAGE_MAP[id];
+  if (bnId) document.getElementById(bnId).classList.add('active');
+  window.scrollTo(0, 0);
+  // Lazy charts
+  if (id === 'payments' && !window._payCropDone) buildPayCrops();
+  if (id === 'home' && !window._homeDone) { buildHomeListings(); window._homeDone = true; }
+}
+
+document.querySelectorAll('.bn-item').forEach(item => {
+  item.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.click(); } });
+});
+
+// =============================================
+// TOAST
+// =============================================
+let _toastTimer;
+function showToast(msg, icon = 'ti-circle-check') {
+  clearTimeout(_toastTimer);
+  const t = document.getElementById('toast');
+  t.querySelector('i').className = 'ti ' + icon;
+  document.getElementById('tmsg').textContent = msg;
+  t.classList.add('show');
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3600);
+}
+
+// =============================================
+// MODAL
+// =============================================
+function openMod(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeMod(e) {
+  if (!e || e.target === document.getElementById('modal-bg')) {
+    document.getElementById('modal-bg').classList.remove('open');
+  }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMod(); });
+
+// =============================================
+// HOME LISTINGS (horizontal scroll)
+// =============================================
+function buildHomeListings() {
+  const el = document.getElementById('home-listings');
+  if (!el) return;
+  LISTINGS.slice(0, 6).forEach(l => {
+    el.innerHTML += `
+      <div class="produce-card" onclick="openListingMod(${l.id})" role="listitem" tabindex="0" aria-label="${l.name}, KES ${l.price} per kg">
+        <span class="pc-badge ${l.badge}">${l.badgeLabel}</span>
+        <div class="pc-name">${l.name}</div>
+        <div class="pc-hub"><i class="ti ti-building-warehouse"></i>${l.hub}</div>
+        <div class="pc-price">KES ${l.price.toLocaleString()}<span>/kg</span></div>
+        <div class="pc-qty">${l.qty} kg available · ${l.farmer}</div>
+        <button class="pc-btn">Place bid</button>
+      </div>`;
+  });
+}
+buildHomeListings();
+
+// =============================================
+// MARKET GRID
+// =============================================
+function buildMarketGrid(filter = 'all') {
+  const el = document.getElementById('market-grid');
+  if (!el) return;
+  const items = filter === 'all' ? LISTINGS : LISTINGS.filter(l =>
+    filter === 'urgent' ? l.status.includes('Urgent') : l.category === filter
+  );
+  if (items.length === 0) {
+    el.innerHTML = `<div class="empty-state"><i class="ti ti-package-off empty-icon"></i><div class="empty-title">No listings found</div><div class="empty-sub">Try a different filter or check back later.</div></div>`;
+    return;
+  }
+  el.innerHTML = '';
+  items.forEach(l => {
+    el.innerHTML += `
+      <div class="hub-card" onclick="openListingMod(${l.id})" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px">
+        <div class="hc-icon"><i class="ti ti-package"></i></div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">
+            <div>
+              <div style="font-size:14px;font-weight:800;color:var(--ink)">${l.name}</div>
+              <div style="font-size:11px;color:var(--ash);font-family:'Literata',serif;margin-top:1px;display:flex;align-items:center;gap:4px"><i class="ti ti-building-warehouse" style="font-size:13px"></i>${l.hub}</div>
+            </div>
+            <span class="pill ${l.sc}" style="flex-shrink:0;margin-left:8px">${l.status}</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+            <div>
+              <div style="font-size:19px;font-weight:900;color:var(--forest)">KES ${l.price.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--ash)">/kg</span></div>
+              <div style="font-size:11px;color:var(--ash);font-family:'Literata',serif">${l.qty} kg · ${l.farmer}</div>
+            </div>
+            <button class="btn btn-primary" style="width:auto;padding:9px 16px;font-size:13px" onclick="event.stopPropagation();openListingMod(${l.id})"><i class="ti ti-gavel"></i>Bid</button>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+buildMarketGrid();
+
+function filterChip(el, filter) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  buildMarketGrid(filter);
+}
+
+// Search
+const srch = document.getElementById('mkt-search');
+if (srch) {
+  srch.addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    const el = document.getElementById('market-grid');
+    if (!q) { buildMarketGrid(); return; }
+    const items = LISTINGS.filter(l => l.name.toLowerCase().includes(q) || l.hub.toLowerCase().includes(q) || l.farmer.toLowerCase().includes(q));
+    el.innerHTML = '';
+    if (items.length === 0) {
+      el.innerHTML = `<div class="empty-state"><i class="ti ti-search-off empty-icon"></i><div class="empty-title">No results for "${q}"</div><div class="empty-sub">Try another product name or county.</div></div>`;
+      return;
+    }
+    items.forEach(l => {
+      el.innerHTML += `<div class="hub-card" onclick="openListingMod(${l.id})" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px">
+        <div class="hc-icon"><i class="ti ti-package"></i></div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:800;color:var(--ink)">${l.name}</div>
+          <div style="font-size:11px;color:var(--ash);font-family:'Literata',serif">${l.hub} · ${l.qty}kg</div>
+          <div style="font-size:19px;font-weight:900;color:var(--forest);margin-top:6px">KES ${l.price.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--ash)">/kg</span></div>
+        </div>
+        <button class="btn btn-primary" style="width:auto;padding:9px 16px;font-size:13px;flex-shrink:0;align-self:flex-end" onclick="event.stopPropagation();openListingMod(${l.id})"><i class="ti ti-gavel"></i>Bid</button>
+      </div>`;
+    });
+  });
+}
+
+// =============================================
+// HUBS LIST
+// =============================================
+(function buildHubs() {
+  const el = document.getElementById('hub-list');
+  if (!el) return;
+  HUBS.forEach(h => {
+    el.innerHTML += `
+      <div class="hub-card" onclick="openHubDetail('${h.name}')">
+        <div class="hc-top">
+          <div class="hc-icon"><i class="ti ti-building-warehouse"></i></div>
+          <span class="pill ${h.status === 'open' ? 'pill-green' : 'pill-red'}">${h.status === 'open' ? 'Open' : 'Full'}</span>
+        </div>
+        <div class="hc-name">${h.name}</div>
+        <div class="hc-loc"><i class="ti ti-map-pin"></i>${h.dist} · ${h.county}</div>
+        <div class="hc-operator"><i class="ti ti-user-check"></i>Operated by ${h.operator}</div>
+        <div style="font-size:12px;color:var(--ink2);font-family:'Literata',serif;margin-top:6px">${h.note}</div>
+        <div class="hc-stats">
+          <div class="hcs"><div class="hcs-val">${h.farmers}</div><div class="hcs-lbl">Farmers</div></div>
+          <div class="hcs"><div class="hcs-val">${h.cap}</div><div class="hcs-lbl">Capacity/wk</div></div>
+          <div class="hcs"><div class="hcs-val">${h.rev}</div><div class="hcs-lbl">Monthly rev</div></div>
+        </div>
+      </div>`;
+  });
+})();
+
+// =============================================
+// NOTIFICATIONS
+// =============================================
+(function buildNotifs() {
+  const el = document.getElementById('notif-list');
+  if (!el) return;
+  NOTIFS.forEach(n => {
+    el.innerHTML += `
+      <div class="notif-item ${n.unread ? 'unread' : ''}" onclick="showToast('Notification opened')">
+        <div class="ni-ico" style="background:${n.ico_bg}"><i class="ti ${n.icon}" style="color:${n.ico_color}"></i></div>
+        <div>
+          <div class="ni-title">${n.title}</div>
+          <div class="ni-body">${n.body}</div>
+          <div class="ni-time">${n.time}</div>
+        </div>
+      </div>`;
+  });
+})();
+
+// =============================================
+// PAYMENT CROP BARS
+// =============================================
+function buildPayCrops() {
+  window._payCropDone = true;
+  const el = document.getElementById('pay-crop-bars');
+  if (!el) return;
+  CROPS.forEach(c => {
+    el.innerHTML += `
+      <div class="prog">
+        <div class="prog-hd">
+          <span class="lbl">${c.name}: KES ${c.from} → KES ${c.to}/kg</span>
+          <span class="val">+${c.pct}%</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${c.pct}%"></div></div>
+      </div>`;
+  });
+}
+
+// =============================================
+// MODALS
+// =============================================
+
+// LISTING DETAIL
+function openListingMod(id) {
+  const l = LISTINGS.find(x => x.id === id);
+  if (!l) return;
+  openMod(`
+    <button class="modal-close-btn" onclick="closeMod()" style="float:right" aria-label="Close"><i class="ti ti-x"></i></button>
+    <span class="pill ${l.badge}" style="margin-bottom:10px;display:inline-flex">${l.badgeLabel}</span>
+    <div class="modal-title" style="margin-top:6px">${l.name}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:13px;color:var(--ash);font-family:'Literata',serif">
+      <i class="ti ti-building-warehouse" style="font-size:16px"></i>${l.hub}
+    </div>
+    <div style="background:var(--mist);border-radius:12px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="text-align:center"><div style="font-size:26px;font-weight:900;color:var(--forest)">KES ${l.price.toLocaleString()}</div><div style="font-size:11px;color:var(--ash)">/kg</div></div>
+      <div style="text-align:center"><div style="font-size:26px;font-weight:900;color:var(--ink)">${l.qty}</div><div style="font-size:11px;color:var(--ash)">kg available</div></div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--ash);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Farmer</div>
+      <div style="font-size:14px;font-weight:800;color:var(--ink)">${l.farmer}</div>
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;color:var(--ash);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Status</div>
+      <span class="pill ${l.sc}">${l.status}</span>
+    </div>
+    <div class="fg">
+      <label>Your bid quantity (kg)</label>
+      <input type="number" placeholder="e.g. 100" min="1" max="${l.qty}" id="bid-qty"/>
+    </div>
+    <div class="fg">
+      <label>Your offered price (KES/kg)</label>
+      <input type="number" placeholder="e.g. ${l.price}" id="bid-price"/>
+    </div>
+    <div class="fg">
+      <label>Your name / company</label>
+      <input type="text" placeholder="e.g. Naivas Distributors" id="bid-name"/>
+    </div>
+    <button class="btn btn-primary" onclick="placeBid('${l.name}')"><i class="ti ti-gavel"></i>Place bid — Farmer notified via SMS</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeMod()">Cancel</button>
+  `);
+}
+
+function placeBid(name) {
+  const qty = document.getElementById('bid-qty')?.value;
+  const price = document.getElementById('bid-price')?.value;
+  const bname = document.getElementById('bid-name')?.value;
+  if (!qty || !price || !bname) { showToast('Please fill in all fields', 'ti-alert-circle'); return; }
+  closeMod();
+  showToast(`Bid placed for ${name}! Farmer SMS sent.`);
+}
+
+// SELL MODAL
+function openSellMod() {
+  openMod(`
+    <button class="modal-close-btn" onclick="closeMod()" style="float:right" aria-label="Close"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Sell your harvest</div>
+
+    <div class="steps" style="padding:0 0 16px">
+      <div class="step done" data-step="1"><div class="step-dot"><i class="ti ti-check" style="font-size:14px"></i></div><div class="step-lbl">Details</div></div>
+      <div class="step active" data-step="2"><div class="step-dot">2</div><div class="step-lbl">Pricing</div></div>
+      <div class="step" data-step="3"><div class="step-dot">3</div><div class="step-lbl">Confirm</div></div>
+    </div>
+
+    <div class="fg">
+      <label>What are you selling?</label>
+      <select id="s-crop">
+        <option value="">Select your produce</option>
+        <option>Tomatoes (raw)</option><option>Tomato paste (processed)</option>
+        <option>Maize (raw)</option><option>Maize flour (milled)</option>
+        <option>Avocado (raw)</option><option>Avocado oil</option>
+        <option>Potatoes (raw)</option><option>Potato chips (unfried)</option>
+        <option>Kale / Sukuma wiki</option><option>Coffee (raw cherries)</option>
+        <option>Coffee (roasted beans)</option><option>Beans</option>
+        <option>Other — specify below</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Quantity available (kg)</label>
+      <input type="number" id="s-qty" placeholder="e.g. 200" min="1"/>
+    </div>
+    <div class="fg">
+      <label>Processing type</label>
+      <select id="s-type">
+        <option>Fresh / raw (no processing)</option>
+        <option>Dried (solar dried at hub)</option>
+        <option>Milled / ground into flour</option>
+        <option>Paste or sauce</option>
+        <option>Chips or sliced</option>
+        <option>Roasted</option>
+        <option>Cold-pressed oil</option>
+        <option>Packaged ready-to-sell</option>
+      </select>
+      <span class="hint">Processing at the hub can increase your earnings by 70–300%</span>
+    </div>
+    <div class="fg">
+      <label>Which hub will you bring it to?</label>
+      <select id="s-hub">
+        <option>Kiambu Hub 1 (2.4 km)</option>
+        <option>Kiambu Hub 2 (4.1 km)</option>
+        <option>Nakuru Hub 1</option>
+        <option>Meru Hub 1</option>
+        <option>Kakamega Hub</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Asking price per kg (KES) — optional</label>
+      <input type="number" id="s-price" placeholder="Leave blank to get best bid"/>
+    </div>
+    <div class="fg">
+      <label>Additional notes for buyers</label>
+      <textarea id="s-notes" placeholder="Quality, harvest date, any special info…" style="min-height:70px"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="submitSell()"><i class="ti ti-send"></i>Post listing — Notify buyers now</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeMod()">Cancel</button>
+  `);
+}
+
+function submitSell() {
+  const crop = document.getElementById('s-crop')?.value;
+  const qty = document.getElementById('s-qty')?.value;
+  if (!crop || !qty) { showToast('Please select produce and quantity', 'ti-alert-circle'); return; }
+  closeMod();
+  showToast(`${crop} (${qty}kg) listed! Buyers notified via SMS.`);
+  // Add to market
+  const newL = { id: LISTINGS.length+1, name: crop, type:'fresh', badge:'pc-b-fresh', badgeLabel:'Fresh',
+    hub: 'Kiambu Hub 1', qty: parseInt(qty), price: 0, farmer: 'Jane Wambui', status:'Open bid', sc:'pill-blue', category:'fresh' };
+  LISTINGS.unshift(newL);
+  buildMarketGrid();
+}
+
+// REGISTER MODAL
+function openRegMod() {
+  openMod(`
+    <button class="modal-close-btn" onclick="closeMod()" style="float:right" aria-label="Close"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Join SAM-LiMP — Free</div>
+    <p style="font-size:13px;color:var(--ash);font-family:'Literata',serif;margin-bottom:18px;line-height:1.65">Register to sell your harvest directly to buyers, process produce at our hubs, and receive instant M-Pesa payments.</p>
+
+    <div class="fg"><label>Your full name</label><input type="text" id="r-name" placeholder="e.g. Jane Wambui"/></div>
+    <div class="fg"><label>M-Pesa phone number</label><input type="tel" id="r-phone" placeholder="0712 000 000"/><span class="hint">This is where you'll receive payments</span></div>
+    <div class="fg"><label>National ID number</label><input type="text" id="r-id" placeholder="National ID"/></div>
+    <div class="fg">
+      <label>Your county</label>
+      <select id="r-county">
+        <option value="">Select county</option>
+        <option>Kiambu</option><option>Nakuru</option><option>Meru</option><option>Kisii</option>
+        <option>Kakamega</option><option>Nyeri</option><option>Murang'a</option><option>Embu</option>
+        <option>Machakos</option><option>Nyandarua</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Primary crop / what you grow</label>
+      <select id="r-crop">
+        <option value="">Select main crop</option>
+        <option>Tomatoes</option><option>Maize</option><option>Potatoes</option><option>Avocado</option>
+        <option>Kale (Sukuma wiki)</option><option>Coffee</option><option>Beans</option><option>Onions</option>
+      </select>
+    </div>
+    <div class="fg"><label>Land size (acres)</label><input type="number" id="r-land" placeholder="e.g. 2" min="0.1" step="0.1"/></div>
+    <button class="btn btn-primary" onclick="submitReg()"><i class="ti ti-user-check"></i>Register — Get M-Pesa confirmation</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeMod()">Cancel</button>
+  `);
+}
+
+function submitReg() {
+  const name = document.getElementById('r-name')?.value.trim();
+  const phone = document.getElementById('r-phone')?.value.trim();
+  const county = document.getElementById('r-county')?.value;
+  if (!name || !phone || !county) { showToast('Please fill in name, phone and county', 'ti-alert-circle'); return; }
+  closeMod();
+  document.getElementById('user-display-name').textContent = name;
+  showToast(`Welcome, ${name}! M-Pesa confirmation sent to ${phone}`);
+}
+
+// HUB DETAIL MODAL
+function openHubDetail(name) {
+  const h = HUBS.find(x => x.name === name) || { name, county:'Kenya', dist:'—', operator:'—', farmers:0, cap:'—', rev:'—', status:'open', note:'' };
+  openMod(`
+    <button class="modal-close-btn" onclick="closeMod()" style="float:right" aria-label="Close"><i class="ti ti-x"></i></button>
+    <span class="pill ${h.status === 'open' ? 'pill-green' : 'pill-red'}" style="margin-bottom:10px;display:inline-flex">${h.status === 'open' ? 'Open now' : 'At capacity'}</span>
+    <div class="modal-title" style="margin-top:4px">${h.name}</div>
+    <div style="font-size:13px;color:var(--ash);font-family:'Literata',serif;margin-bottom:16px;display:flex;align-items:center;gap:6px"><i class="ti ti-map-pin" style="font-size:16px"></i>${h.dist} away · ${h.county}</div>
+
+    <div style="background:var(--mist);border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="font-size:13px;color:var(--ink2);font-family:'Literata',serif;line-height:1.65">${h.note}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;background:var(--bone);border-radius:12px;padding:12px;margin-bottom:16px">
+      <div style="text-align:center"><div style="font-size:20px;font-weight:900;color:var(--forest)">${h.farmers}</div><div style="font-size:10px;color:var(--ash)">Farmers</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:900;color:var(--forest)">${h.cap}</div><div style="font-size:10px;color:var(--ash)">Cap/week</div></div>
+      <div style="text-align:center"><div style="font-size:16px;font-weight:900;color:var(--forest)">${h.rev}</div><div style="font-size:10px;color:var(--ash)">Revenue/mo</div></div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--ash);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Hub operator</div>
+      <div style="font-size:14px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:6px"><i class="ti ti-user-check" style="font-size:18px;color:var(--leaf)"></i>${h.operator}</div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px">What this hub offers:</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:7px">
+        <li style="font-size:13px;font-family:'Literata',serif;color:var(--ink2);display:flex;gap:8px"><i class="ti ti-check" style="color:var(--leaf);flex-shrink:0;font-size:16px;margin-top:1px"></i>Weighing & quality grading</li>
+        <li style="font-size:13px;font-family:'Literata',serif;color:var(--ink2);display:flex;gap:8px"><i class="ti ti-check" style="color:var(--leaf);flex-shrink:0;font-size:16px;margin-top:1px"></i>Processing: drying, milling, packaging</li>
+        <li style="font-size:13px;font-family:'Literata',serif;color:var(--ink2);display:flex;gap:8px"><i class="ti ti-check" style="color:var(--leaf);flex-shrink:0;font-size:16px;margin-top:1px"></i>Direct buyer connections</li>
+        <li style="font-size:13px;font-family:'Literata',serif;color:var(--ink2);display:flex;gap:8px"><i class="ti ti-check" style="color:var(--leaf);flex-shrink:0;font-size:16px;margin-top:1px"></i>Instant M-Pesa payment</li>
+      </ul>
+    </div>
+
+    <button class="btn btn-primary" onclick="closeMod();openSellMod()"><i class="ti ti-plant-2"></i>Bring my harvest to this hub</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeMod();showToast('Calling ${h.name}…')"><i class="ti ti-phone"></i>Call the hub operator</button>
+  `);
+}
+
+// HUB APPLY MODAL
+function openHubApplyMod() {
+  openMod(`
+    <button class="modal-close-btn" onclick="closeMod()" style="float:right" aria-label="Close"><i class="ti ti-x"></i></button>
+    <div class="modal-title">Apply to run a hub</div>
+    <div style="background:var(--sand);border:1.5px solid #f0d8a8;border-radius:12px;padding:14px;margin-bottom:18px">
+      <div style="font-size:13px;font-weight:800;color:var(--gold);margin-bottom:4px">💰 Hub operators earn KES 85,000/month avg</div>
+      <div style="font-size:12px;color:var(--ink2);font-family:'Literata',serif;line-height:1.6">Investment pays back in 4 months. You hire 2–3 youth from your community and provide processing services to 50+ farmers.</div>
+    </div>
+    <div class="fg"><label>Your full name</label><input type="text" placeholder="Full name"/></div>
+    <div class="fg"><label>Phone number</label><input type="tel" placeholder="0712 000 000"/></div>
+    <div class="fg"><label>Proposed location</label><input type="text" placeholder="Village, sub-county, county"/></div>
+    <div class="fg"><label>Farmers in your area (estimate)</label><input type="number" placeholder="e.g. 50"/></div>
+    <div class="fg"><label>Primary crops in your area</label><input type="text" placeholder="e.g. Maize, Tomatoes, Potatoes"/></div>
+    <div class="fg"><label>Why do you want to run a hub?</label><textarea placeholder="Tell us about yourself and your community…" style="min-height:80px"></textarea></div>
+    <button class="btn btn-gold" onclick="closeMod();showToast('Application submitted! We will contact you within 48 hours.')"><i class="ti ti-send"></i>Submit application</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeMod()">Cancel</button>
+  `);
+}
+
+// PROFILE MODAL
+function openProfileMod() {
+  openMod(`
+    <button class="modal-close-btn" onclick="closeMod()" style="float:right" aria-label="Close"><i class="ti ti-x"></i></button>
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="width:64px;height:64px;border-radius:50%;background:#d4f5e4;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#0a5c38;margin:0 auto 10px">JW</div>
+      <div style="font-size:18px;font-weight:900;color:var(--ink)">Jane Wambui</div>
+      <div style="font-size:13px;color:var(--ash);font-family:'Literata',serif">Farmer · Kiambu · ID KE-0712-2024</div>
+      <div style="margin-top:8px;display:flex;justify-content:center;gap:6px"><span class="pill pill-green">Verified ✓</span><span class="pill pill-blue">Tomatoes</span></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bone);font-size:13px"><span style="color:var(--ash);font-family:'Literata',serif">M-Pesa</span><span style="font-weight:800">0712 *** 842</span></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bone);font-size:13px"><span style="color:var(--ash);font-family:'Literata',serif">County</span><span style="font-weight:800">Kiambu</span></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bone);font-size:13px"><span style="color:var(--ash);font-family:'Literata',serif">Nearest hub</span><span style="font-weight:800">Kiambu Hub 1</span></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:13px"><span style="color:var(--ash);font-family:'Literata',serif">Member since</span><span style="font-weight:800">March 2024</span></div>
+    </div>
+    <button class="btn btn-secondary" onclick="closeMod()"><i class="ti ti-edit"></i>Edit profile</button>
+    <button class="btn btn-danger" style="margin-top:8px" onclick="closeMod();showToast('Logged out')"><i class="ti ti-logout"></i>Log out</button>
+  `);
+}
+
+// =============================================
+// SPLASH
+// =============================================
+setTimeout(() => {
+  const s = document.getElementById('splash');
+  if (s) s.classList.add('hide');
+  setTimeout(() => { if (s) s.style.display = 'none'; }, 700);
+}, 1800);
+</script>
+
+</body></html>
