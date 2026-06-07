@@ -1,196 +1,176 @@
 const express = require('express');
-const router = express.Router();
-const { Payment } = require('../models/Hub');
-const Farmer = require('../models/Farmer');
+const router  = express.Router();
+const { pool } = require('../config/db');
 const { protect, restrictTo } = require('../middleware/auth');
 const mpesa = require('../services/mpesa');
-const smsService = require('../services/sms');
+const sms   = require('../services/sms');
 
-// ─── POST /api/payments/initiate ─── Initiate M-Pesa STK Push
+const normalize = (phone) =>
+  phone.replace(/\s+/g, '').replace(/^\+/, '').replace(/^0/, '254');
+
+// POST /api/payments/initiate
 router.post('/initiate', protect, async (req, res) => {
   try {
-    const { farmerPhone, amountKES, listingId, hubId, hubName, description } = req.body;
+    const { farmerPhone, amountKES, listingId, hubName, description } = req.body;
+    if (!farmerPhone || !amountKES)
+      return res.status(400).json({ success: false, message: 'Phone and amount required.' });
 
-    if (!farmerPhone || !amountKES) {
-      return res.status(400).json({ success: false, message: 'Phone and amount are required.' });
-    }
+    const normalizedPhone = normalize(farmerPhone);
+    const farmerResult = await pool.query(
+      'SELECT id, full_name FROM farmers WHERE phone = $1',
+      [normalizedPhone]
+    );
+    if (!farmerResult.rows.length)
+      return res.status(404).json({ success: false, message: 'Farmer not found.' });
 
-    // Find the farmer
-    const normalizedPhone = farmerPhone.replace(/\s+/g, '').replace(/^0/, '254').replace(/^\+/, '');
-    const farmer = await Farmer.findOne({ phone: normalizedPhone });
-    if (!farmer) return res.status(404).json({ success: false, message: 'Farmer not found.' });
+    const farmer = farmerResult.rows[0];
+    const commission  = Math.round(Number(amountKES) * 0.025);
+    const netToFarmer = Number(amountKES) - commission;
 
-    const commission = Math.round(amountKES * 0.025);
-    const netToFarmer = amountKES - commission;
+    const { rows } = await pool.query(
+      `INSERT INTO payments (farmer_id, farmer_name, farmer_phone, listing_id,
+        hub_name, amount_kes, commission_kes, net_to_farmer, description, mpesa_status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'pending') RETURNING id`,
+      [farmer.id, farmer.full_name, normalizedPhone, listingId || null,
+       hubName, Number(amountKES), commission, netToFarmer,
+       description || 'Produce sale payment']
+    );
+    const paymentId = rows[0].id;
 
-    // Create payment record
-    const payment = await Payment.create({
-      farmer: farmer._id,
-      farmerName: farmer.fullName,
-      farmerPhone: normalizedPhone,
-      listing: listingId,
-      hub: hubId,
-      hubName,
-      amountKES: Number(amountKES),
-      commissionKES: commission,
-      netToFarmer,
-      description: description || 'Produce sale payment',
-      mpesaStatus: 'pending',
-    });
-
-    // Trigger STK Push
+    // Trigger M-Pesa STK Push
     let mpesaResponse;
     try {
       mpesaResponse = await mpesa.stkPush({
         phone: normalizedPhone,
         amount: netToFarmer,
-        accountRef: `SAMLIM-${payment._id.toString().slice(-6).toUpperCase()}`,
-        description: `SAM-LiMP: ${description || 'Produce sale'}`,
+        accountRef: `SAMLIM-${paymentId.toString().slice(-6).toUpperCase()}`,
+        description: description || 'SAM-LiMP produce sale',
       });
-
-      payment.mpesaRef = mpesaResponse.MerchantRequestID;
-      await payment.save();
+      await pool.query(
+        'UPDATE payments SET mpesa_ref = $1 WHERE id = $2',
+        [mpesaResponse.MerchantRequestID, paymentId]
+      );
     } catch (mpesaErr) {
-      // M-Pesa error — still return payment ID for retry
-      console.error('M-Pesa STK error:', mpesaErr.message);
-      payment.mpesaStatus = 'failed';
-      payment.mpesaResultDesc = mpesaErr.message;
-      await payment.save();
+      await pool.query(
+        "UPDATE payments SET mpesa_status = 'failed', mpesa_result_desc = $1 WHERE id = $2",
+        [mpesaErr.message, paymentId]
+      );
       return res.status(502).json({
         success: false,
         message: 'M-Pesa request failed. Please try again.',
-        paymentId: payment._id,
+        paymentId,
       });
     }
 
     res.status(201).json({
       success: true,
-      message: `M-Pesa STK Push sent to ${farmer.fullName} (${normalizedPhone}). Awaiting confirmation.`,
-      data: {
-        paymentId: payment._id,
-        merchantRequestId: mpesaResponse.MerchantRequestID,
-        checkoutRequestId: mpesaResponse.CheckoutRequestID,
-        amountKES,
-        commission,
-        netToFarmer,
-      },
+      message: `M-Pesa STK Push sent to ${farmer.full_name}. Awaiting confirmation.`,
+      data: { paymentId, amountKES, commission, netToFarmer },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// ─── POST /api/payments/mpesa-callback ─── Safaricom calls this
+// POST /api/payments/mpesa-callback — Safaricom calls this
 router.post('/mpesa-callback', async (req, res) => {
   try {
-    const callbackData = req.body?.Body?.stkCallback;
-    if (!callbackData) {
-      return res.status(400).json({ ResultCode: 1, ResultDesc: 'Bad request' });
-    }
+    const callback = req.body?.Body?.stkCallback;
+    if (!callback) return res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
 
-    const { MerchantRequestID, CheckoutRequestID, ResultCode, ResultDesc, CallbackMetadata } = callbackData;
+    const { MerchantRequestID, ResultCode, ResultDesc, CallbackMetadata } = callback;
 
-    const payment = await Payment.findOne({ mpesaRef: MerchantRequestID });
-    if (!payment) {
-      console.warn('Payment not found for MerchantRequestID:', MerchantRequestID);
+    const payResult = await pool.query(
+      'SELECT * FROM payments WHERE mpesa_ref = $1',
+      [MerchantRequestID]
+    );
+    if (!payResult.rows.length)
       return res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
-    }
 
-    payment.mpesaResultCode = ResultCode;
-    payment.mpesaResultDesc = ResultDesc;
-    payment.mpesaCallbackData = callbackData;
+    const payment = payResult.rows[0];
 
     if (ResultCode === 0) {
-      // Success
-      payment.mpesaStatus = 'success';
-      payment.completedAt = new Date();
-
-      // Extract receipt from metadata
-      const items = CallbackMetadata?.Item || [];
+      const items  = CallbackMetadata?.Item || [];
       const receipt = items.find(i => i.Name === 'MpesaReceiptNumber')?.Value;
-      if (receipt) payment.mpesaReceiptNumber = receipt;
 
-      await payment.save();
-
-      // Update farmer totals
-      await Farmer.findByIdAndUpdate(payment.farmer, {
-        $inc: { totalEarned: payment.netToFarmer, totalSales: 1 },
-        lastPaymentDate: new Date(),
-        lastPaymentAmt: payment.netToFarmer,
-      });
-
-      // Send confirmation SMS to farmer
-      await smsService.send(
-        payment.farmerPhone,
-        `SAM-LiMP ✅ KES ${payment.netToFarmer.toLocaleString()} received! M-Pesa ref: ${receipt}. Keep farming and earning more!`
+      await pool.query(
+        `UPDATE payments SET mpesa_status = 'success', mpesa_receipt = $1,
+          mpesa_result_code = 0, mpesa_result_desc = $2, completed_at = NOW()
+         WHERE id = $3`,
+        [receipt, ResultDesc, payment.id]
+      );
+      await pool.query(
+        `UPDATE farmers SET
+          total_earned = total_earned + $1,
+          total_sales  = total_sales + 1
+         WHERE id = $2`,
+        [payment.net_to_farmer, payment.farmer_id]
+      );
+      await sms.send(
+        payment.farmer_phone,
+        `SAM-LiMP ✅ KES ${payment.net_to_farmer.toLocaleString()} received! Ref: ${receipt || 'N/A'}. Keep farming and earning more!`
       );
     } else {
-      payment.mpesaStatus = 'failed';
-      await payment.save();
-
-      // Notify farmer of failure
-      await smsService.send(
-        payment.farmerPhone,
-        `SAM-LiMP: Payment of KES ${payment.amountKES.toLocaleString()} failed (${ResultDesc}). Contact support: +254 700 000 000`
+      await pool.query(
+        "UPDATE payments SET mpesa_status = 'failed', mpesa_result_code = $1, mpesa_result_desc = $2 WHERE id = $3",
+        [ResultCode, ResultDesc, payment.id]
       );
     }
 
     res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
   } catch (err) {
     console.error('M-Pesa callback error:', err);
-    res.json({ ResultCode: 0, ResultDesc: 'Accepted' }); // Always acknowledge Safaricom
+    res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
   }
 });
 
-// ─── GET /api/payments/status/:paymentId ─── Poll payment status
-router.get('/status/:paymentId', protect, async (req, res) => {
+// GET /api/payments/status/:id
+router.get('/status/:id', protect, async (req, res) => {
   try {
-    const payment = await Payment.findById(req.params.paymentId).populate('farmer', 'fullName phone');
-    if (!payment) return res.status(404).json({ success: false, message: 'Payment not found.' });
-    res.json({ success: true, data: payment });
+    const { rows } = await pool.query('SELECT * FROM payments WHERE id = $1', [req.params.id]);
+    if (!rows.length)
+      return res.status(404).json({ success: false, message: 'Payment not found.' });
+    res.json({ success: true, data: rows[0] });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// ─── GET /api/payments/my ─── Farmer's own payment history
+// GET /api/payments/my
 router.get('/my', protect, async (req, res) => {
   try {
-    const payments = await Payment.find({ farmer: req.user._id })
-      .sort({ createdAt: -1 })
-      .limit(50);
-    res.json({ success: true, data: payments });
+    const { rows } = await pool.query(
+      'SELECT * FROM payments WHERE farmer_id = $1 ORDER BY created_at DESC LIMIT 50',
+      [req.user.id]
+    );
+    res.json({ success: true, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// ─── GET /api/payments ─── Admin: all payments
+// GET /api/payments — admin
 router.get('/', protect, restrictTo('admin'), async (req, res) => {
   try {
     const { status, page = 1, limit = 50 } = req.query;
-    const filter = {};
-    if (status) filter.mpesaStatus = status;
+    let q = 'SELECT p.*, f.full_name as farmer_name FROM payments p LEFT JOIN farmers f ON p.farmer_id = f.id WHERE 1=1';
+    const params = [];
+    if (status) { params.push(status); q += ` AND p.mpesa_status = $${params.length}`; }
+    q += ` ORDER BY p.created_at DESC LIMIT $${params.length+1} OFFSET $${params.length+2}`;
+    params.push(Number(limit), (page - 1) * Number(limit));
 
-    const payments = await Payment.find(filter)
-      .populate('farmer', 'fullName phone county')
-      .populate('hub', 'name')
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
-
-    const total = await Payment.countDocuments(filter);
-    const totalAmount = await Payment.aggregate([
-      { $match: { mpesaStatus: 'success' } },
-      { $group: { _id: null, total: { $sum: '$netToFarmer' }, commission: { $sum: '$commissionKES' } } },
-    ]);
+    const { rows } = await pool.query(q, params);
+    const agg = await pool.query(
+      "SELECT SUM(net_to_farmer) as total, SUM(commission_kes) as commission FROM payments WHERE mpesa_status = 'success'"
+    );
+    const total = (await pool.query('SELECT COUNT(*) FROM payments')).rows[0].count;
 
     res.json({
       success: true,
-      total, page: Number(page),
-      totalDisbursed: totalAmount[0]?.total || 0,
-      totalCommission: totalAmount[0]?.commission || 0,
-      data: payments,
+      total: Number(total),
+      totalDisbursed:  Number(agg.rows[0].total    || 0),
+      totalCommission: Number(agg.rows[0].commission || 0),
+      data: rows,
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
