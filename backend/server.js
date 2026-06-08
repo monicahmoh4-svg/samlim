@@ -20,14 +20,17 @@ connectDB();
 
 app.use(helmet());
 app.use(cors({ origin: '*', credentials: true }));
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300,
-  message: { success: false, message: 'Too many requests.' } }));
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  message: { success: false, message: 'Too many requests.' },
+}));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 if (process.env.NODE_ENV !== 'production') app.use(morgan('dev'));
 
 app.get('/',       (_req, res) => res.json({ status: 'ok', service: 'SAM-LiMP API', db: 'Neon PostgreSQL' }));
-app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'SAM-LiMP API' }));
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 app.use('/api/auth',          authRoutes);
 app.use('/api/farmers',       farmerRoutes);
@@ -42,7 +45,10 @@ app.use((req, res) =>
 
 app.use((err, _req, res, _next) => {
   console.error(err.message);
-  res.status(err.statusCode || 500).json({ success: false, message: err.message || 'Server error' });
+  res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || 'Server error',
+  });
 });
 
 const PORT = process.env.PORT || 5000;
